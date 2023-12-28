@@ -1,0 +1,132 @@
+name: opentelekomcloud
+version: v0.0.1
+description: |-
+  DevPod on OpenTelekomCloud
+icon: https://avatars.githubusercontent.com/u/19344672?s=200&v=4
+optionGroups:
+  - options:
+      - SCW_DISK_SIZE
+      - SCW_IMAGE
+      - SCW_COMMERCIAL_TYPE
+      - SCW_DEFAULT_ZONE
+    name: "Open Telekom Cloud Options"
+  - options:
+      - AGENT_PATH
+      - AGENT_DATA_PATH
+      - INACTIVITY_TIMEOUT
+      - INJECT_DOCKER_CREDENTIALS
+      - INJECT_GIT_CREDENTIALS
+    name: "Agent Options"
+options:
+  ACCESS_KEY:
+    description: The Open Telekom Cloud Access Key
+    required: true
+    password: true
+
+  SECRET_KEY:
+    description: The Open Telekom Cloud Secret Key
+    required: true
+    password: true
+
+  DOMAIN_NAME:
+    description: The Open Telekom Cloud Domain Name (e.g. OTC000000000010000XXXXX)
+    required: true
+
+  TENANT_NAME:
+    description: The Open Telekom Cloud Tenant Name
+    required: true
+
+  REGION:
+    description: The Open Telekom Cloud Region (e.g. eu-de)
+    required: true
+    default: eu-de
+    suggestions:
+      - eu-de
+      - eu-nl
+      - eu-ch
+
+  DISK_SIZE:
+    description: Virtual Machine's Disk Size (in GB)
+    default: "40"
+
+  DISK_IMAGE:
+    description: Virtual Machine's Disk Image
+    default: docker
+#  SCW_COMMERCIAL_TYPE:
+#    description: The machine type to use.
+#    default: PLAY2-MICRO
+#    suggestions:
+#      - PLAY2-PICO
+#      - PLAY2-NANO
+#      - PLAY2-MICRO
+#      - DEV1-S
+#      - DEV1-M
+#      - DEV1-L
+#      - GP1-XS
+#      - GP1-S
+#      - GP1-M
+#      - GP1-L
+  INACTIVITY_TIMEOUT:
+    description: If defined, will automatically stop the VM after the inactivity period.
+    default: 10m
+  INJECT_GIT_CREDENTIALS:
+    description: "If DevPod should inject git credentials into the remote host."
+    default: "true"
+  INJECT_DOCKER_CREDENTIALS:
+    description: "If DevPod should inject docker credentials into the remote host."
+    default: "true"
+  AGENT_PATH:
+    description: The path where to inject the DevPod agent to.
+    default: /home/devpod/.devpod/devpod
+  AGENT_DATA_PATH:
+    description: The path where to store the agent data.
+    default: /home/devpod/.devpod/agent
+agent:
+  path: ${AGENT_PATH}
+  dataPath: ${AGENT_DATA_PATH}
+  inactivityTimeout: ${INACTIVITY_TIMEOUT}
+  injectGitCredentials: ${INJECT_GIT_CREDENTIALS}
+  injectDockerCredentials: ${INJECT_DOCKER_CREDENTIALS}
+  binaries:
+    SCW_PROVIDER:
+      - os: linux
+        arch: amd64
+        path: https://github.com/dirien/devpod-provider-scaleway/releases/download/##VERSION##/devpod-provider-scaleway-linux-amd64
+        checksum: ##CHECKSUM_LINUX_AMD64##
+      - os: linux
+        arch: arm64
+        path: https://github.com/dirien/devpod-provider-scaleway/releases/download/##VERSION##/devpod-provider-scaleway-linux-arm64
+        checksum: ##CHECKSUM_LINUX_ARM64##
+  exec:
+    shutdown: |-
+      ${SCW_PROVIDER} stop
+#binaries:
+#  SCW_PROVIDER:
+#    - os: linux
+#      arch: amd64
+#      path: https://github.com/dirien/devpod-provider-scaleway/releases/download/##VERSION##/devpod-provider-scaleway-linux-amd64
+#      checksum: ##CHECKSUM_LINUX_AMD64##
+#    - os: linux
+#      arch: arm64
+#      path: https://github.com/dirien/devpod-provider-scaleway/releases/download/##VERSION##/devpod-provider-scaleway-linux-arm64
+#      checksum: ##CHECKSUM_LINUX_ARM64##
+#    - os: darwin
+#      arch: amd64
+#      path: https://github.com/dirien/devpod-provider-scaleway/releases/download/##VERSION##/devpod-provider-scaleway-darwin-amd64
+#      checksum: ##CHECKSUM_DARWIN_AMD64##
+#    - os: darwin
+#      arch: arm64
+#      path: https://github.com/dirien/devpod-provider-scaleway/releases/download/##VERSION##/devpod-provider-scaleway-darwin-arm64
+#      checksum: ##CHECKSUM_DARWIN_ARM64##
+#    - os: windows
+#      arch: amd64
+#      path: https://github.com/dirien/devpod-provider-scaleway/releases/download/##VERSION##/devpod-provider-scaleway-windows-amd64.exe
+#      checksum: ##CHECKSUM_WINDOWS_AMD64##
+exec:
+  init: echo "init"
+  command: echo "command"
+  create: echo "create"
+  delete: echo "delete"
+  start: echo "start"
+  stop: echo "stop"
+  status: echo "status"
