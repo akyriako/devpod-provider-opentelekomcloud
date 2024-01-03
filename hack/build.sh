@@ -59,5 +59,7 @@ for OS in ${PROVIDER_BUILD_PLATFORMS[@]}; do
   done
 done
 
+echo ${RELEASE_VERSION}
+
 # generate provider.yaml
 go run -mod vendor "${PROVIDER_ROOT}/hack/provider/main.go" ${RELEASE_VERSION} > "${PROVIDER_ROOT}/release/provider.yaml"
