@@ -59,13 +59,13 @@ func (cmd *CommandCmd) Run(
 	}
 
 	// get instance
-	instance, err := opentelekomcloud.GetDevpodInstance(opentelekomcloudProvider)
+	instance, err := opentelekomcloudProvider.GetDevpodInstance()
 	if err != nil {
 		return err
 	}
 
 	// get elastic ip
-	floatingIp, err := opentelekomcloud.GetDevpodInstanceElasticIp(opentelekomcloudProvider, instance)
+	floatingIp, err := opentelekomcloudProvider.GetDevpodInstanceElasticIp(instance)
 	if err != nil {
 		return err
 	}

@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/base64"
 	"fmt"
-	"github.com/akyriako/devpod-provider-opentelekomcloud/pkg/options"
 	"github.com/loft-sh/devpod/pkg/ssh"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/common/tags"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/extensions/bootfromvolume"
@@ -13,7 +12,6 @@ import (
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/extensions/secgroups"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/extensions/startstop"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/servers"
-	"os"
 	"slices"
 	"strings"
 	"time"
@@ -71,16 +69,16 @@ func (o *OpenTelekomCloudProvider) getServer(machineId string) (*servers.Server,
 	return nil, fmt.Errorf("found no devpod machine with id: %s", machineId)
 }
 
-func (o *OpenTelekomCloudProvider) startServer() {
-	startstop.Start(o.ecsv2ServiceClient, o.Config.ServerID)
+func (o *OpenTelekomCloudProvider) startServer(serverId string) {
+	startstop.Start(o.ecsv2ServiceClient, serverId)
 }
 
-func (o *OpenTelekomCloudProvider) deleteServer() error {
-	return servers.Delete(o.ecsv2ServiceClient, o.Config.ServerID).ExtractErr()
+func (o *OpenTelekomCloudProvider) deleteServer(serverId string) error {
+	return servers.Delete(o.ecsv2ServiceClient, serverId).ExtractErr()
 }
 
-func (o *OpenTelekomCloudProvider) stopServer() {
-	startstop.Stop(o.ecsv2ServiceClient, o.Config.ServerID)
+func (o *OpenTelekomCloudProvider) stopServer(serverId string) {
+	startstop.Stop(o.ecsv2ServiceClient, serverId)
 }
 
 func (o *OpenTelekomCloudProvider) createServer() (*servers.Server, error) {
@@ -99,18 +97,23 @@ func (o *OpenTelekomCloudProvider) createServer() (*servers.Server, error) {
 		return nil, err
 	}
 
-	var fip *floatingips.FloatingIP
-	if o.Config.FloatingIpID == "" {
-		fip, err = o.createElasticIpAddress()
-		if err != nil {
-			return nil, err
-		}
-		//defer o.deleteElasticIpAddress(fip.ID)
-	} else {
-		fip, err = o.getElasticIpAddress(o.Config.FloatingIpID)
-		if err != nil {
-			return nil, err
-		}
+	//var fip *floatingips.FloatingIP
+	//if o.Config.FloatingIpID == "" {
+	//	fip, err = o.createElasticIpAddress()
+	//	if err != nil {
+	//		return nil, err
+	//	}
+	//	//defer o.deleteElasticIpAddress(fip.ID)
+	//} else {
+	//	fip, err = o.getElasticIpAddress(o.Config.FloatingIpID)
+	//	if err != nil {
+	//		return nil, err
+	//	}
+	//}
+
+	fip, err := o.createElasticIpAddress()
+	if err != nil {
+		return nil, err
 	}
 
 	cloudConfigReader := strings.NewReader(
@@ -162,20 +165,13 @@ func (o *OpenTelekomCloudProvider) createServer() (*servers.Server, error) {
 		return nil, err
 	}
 
-	o.Config.ServerID = server.ID
-
 	// Wait until the server is in the "ACTIVE" state
-	err = o.waitForServerActive()
+	err = o.waitForServerActive(server.ID)
 	if err != nil {
 		return nil, err
 	}
 
 	err = o.assosiateElasticIpAddress(server, fip)
-	if err != nil {
-		return nil, err
-	}
-
-	err = os.Setenv(options.OTC_FLOATINGIP_ID, fip.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -202,11 +198,11 @@ func (o *OpenTelekomCloudProvider) createServer() (*servers.Server, error) {
 	return server, nil
 }
 
-func (o *OpenTelekomCloudProvider) waitForServerActive() error {
+func (o *OpenTelekomCloudProvider) waitForServerActive(serverId string) error {
 	start := time.Now()
 
 	for {
-		server, err := servers.Get(o.ecsv2ServiceClient, o.Config.ServerID).Extract()
+		server, err := servers.Get(o.ecsv2ServiceClient, serverId).Extract()
 		if err != nil {
 			continue
 		}

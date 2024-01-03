@@ -15,7 +15,6 @@ var (
 	OTC_FLAVOR_ID        = "OTC_FLAVOR_ID"
 	OTC_DISK_IMAGE       = "OTC_DISK_IMAGE"
 	OTC_DISK_SIZE        = "OTC_DISK_SIZE"
-	OTC_FLOATINGIP_ID    = "OTC_FLOATINGIP_ID"
 	MACHINE_ID           = "MACHINE_ID"
 	MACHINE_FOLDER       = "MACHINE_FOLDER"
 )
@@ -29,9 +28,6 @@ type Options struct {
 
 	Region string
 	Tenant string
-
-	FloatingIpID string
-	ServerID     string
 
 	MachineID     string
 	MachineFolder string
@@ -111,8 +107,6 @@ func FromEnv(init bool) (*Options, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	retOptions.FloatingIpID = os.Getenv(OTC_FLOATINGIP_ID)
 
 	return retOptions, nil
 }

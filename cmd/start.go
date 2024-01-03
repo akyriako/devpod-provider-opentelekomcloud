@@ -43,5 +43,5 @@ func (cmd *StartCmd) Run(
 	machine *provider.Machine,
 	logs log.Logger,
 ) error {
-	return opentelekomcloud.Start(opentelekomcloudProvider)
+	return opentelekomcloudProvider.Start()
 }

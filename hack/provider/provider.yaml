@@ -16,7 +16,6 @@ optionGroups:
       - OTC_DISK_SIZE
       - OTC_NETWORK_ID
       - OTC_SECURITYGROUP_ID
-      - OTC_FLOATINGIP_ID
     name: "Open Telekom Cloud Elastic Cloud Server Options"
   - options:
       - AGENT_PATH
@@ -52,9 +51,6 @@ options:
   OTC_NETWORK_ID:
     description: The Open Telekom Cloud Subnet ID to place the VM into
     required: true
-
-  OTC_FLOATINGIP_ID:
-    description: The Open Telekom Cloud Elastic IP ID to associate with the VM
 
   OTC_SECURITYGROUP_ID:
     description: The Open Telekom Cloud Security Group ID to use with this VM

@@ -46,7 +46,7 @@ func (cmd *StatusCmd) Run(
 	logs log.Logger,
 ) error {
 
-	status, err := opentelekomcloud.Status(opentelekomcloudProvider)
+	status, err := opentelekomcloudProvider.Status()
 	if err != nil {
 		return err
 	}

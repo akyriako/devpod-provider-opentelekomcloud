@@ -18,13 +18,17 @@ const (
 )
 
 type OpenTelekomCloudProvider struct {
-	Config             *options.Options
-	authOptions        *golangsdk.AKSKAuthOptions
-	Client             *golangsdk.ProviderClient
+	Config      *options.Options
+	authOptions *golangsdk.AKSKAuthOptions
+
+	Client *golangsdk.ProviderClient
+
 	ecsv1ServiceClient *golangsdk.ServiceClient
 	ecsv2ServiceClient *golangsdk.ServiceClient
-	Log                log.Logger
-	WorkingDirectory   string
+
+	Log log.Logger
+
+	WorkingDirectory string
 }
 
 func NewProvider(log log.Logger, init bool) (*OpenTelekomCloudProvider, error) {
@@ -96,31 +100,30 @@ func NewProvider(log log.Logger, init bool) (*OpenTelekomCloudProvider, error) {
 	return openTelekomCloudProvider, nil
 }
 
-func GetDevpodInstance(openTelekomCloudProvider *OpenTelekomCloudProvider) (*servers.Server, error) {
-	server, err := openTelekomCloudProvider.getServer(openTelekomCloudProvider.Config.MachineID)
+func (o *OpenTelekomCloudProvider) GetDevpodInstance() (*servers.Server, error) {
+	server, err := o.getServer(o.Config.MachineID)
 	if err != nil {
 		return nil, err
 	}
 
-	openTelekomCloudProvider.Config.ServerID = server.ID
 	return server, nil
 }
 
-func GetDevpodInstanceElasticIp(openTelekomCloudProvider *OpenTelekomCloudProvider, devPodInstance *servers.Server) (string, error) {
-	if devPodInstance == nil {
-		dpi, err := GetDevpodInstance(openTelekomCloudProvider)
+func (o *OpenTelekomCloudProvider) GetDevpodInstanceElasticIp(server *servers.Server) (string, error) {
+	if server == nil {
+		dpi, err := o.GetDevpodInstance()
 		if err != nil {
 			return "", err
 		}
 
-		devPodInstance = dpi
+		server = dpi
 	}
 
-	return openTelekomCloudProvider.extractElasticIpAddress(*devPodInstance)
+	return o.extractElasticIpAddress(*server)
 }
 
-func Create(opentelekomcloudProvider *OpenTelekomCloudProvider) error {
-	_, err := opentelekomcloudProvider.createServer()
+func (o *OpenTelekomCloudProvider) Create() error {
+	_, err := o.createServer()
 	if err != nil {
 		return err
 	}
@@ -128,27 +131,27 @@ func Create(opentelekomcloudProvider *OpenTelekomCloudProvider) error {
 	return nil
 }
 
-func Delete(openTelekomCloudProvider *OpenTelekomCloudProvider) error {
-	_, err := GetDevpodInstance(openTelekomCloudProvider)
+func (o *OpenTelekomCloudProvider) Delete() error {
+	server, err := o.GetDevpodInstance()
 	if err != nil {
 		return err
 	}
 
-	return openTelekomCloudProvider.deleteServer()
+	return o.deleteServer(server.ID)
 }
 
-func Start(openTelekomCloudProvider *OpenTelekomCloudProvider) error {
-	_, err := GetDevpodInstance(openTelekomCloudProvider)
+func (o *OpenTelekomCloudProvider) Start() error {
+	server, err := o.GetDevpodInstance()
 	if err != nil {
 		return err
 	}
 
-	openTelekomCloudProvider.startServer()
+	o.startServer(server.ID)
 	return nil
 }
 
-func Status(openTelekomCloudProvider *OpenTelekomCloudProvider) (client.Status, error) {
-	devPodInstance, err := GetDevpodInstance(openTelekomCloudProvider)
+func (o *OpenTelekomCloudProvider) Status() (client.Status, error) {
+	devPodInstance, err := o.GetDevpodInstance()
 	if err != nil {
 		return client.StatusNotFound, nil
 	}
@@ -164,19 +167,19 @@ func Status(openTelekomCloudProvider *OpenTelekomCloudProvider) (client.Status, 
 	}
 }
 
-func Stop(openTelekomCloudProvider *OpenTelekomCloudProvider) error {
-	_, err := GetDevpodInstance(openTelekomCloudProvider)
+func (o *OpenTelekomCloudProvider) Stop() error {
+	server, err := o.GetDevpodInstance()
 	if err != nil {
 		return err
 	}
 
-	openTelekomCloudProvider.stopServer()
+	o.stopServer(server.ID)
 
 	return nil
 }
 
-func Init(openTelekomCloudProvider *OpenTelekomCloudProvider) error {
-	err := openstack.Authenticate(openTelekomCloudProvider.Client, *openTelekomCloudProvider.authOptions)
+func (o *OpenTelekomCloudProvider) Init() error {
+	err := openstack.Authenticate(o.Client, *o.authOptions)
 	if err != nil {
 		return err
 	}

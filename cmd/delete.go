@@ -43,5 +43,5 @@ func (cmd *DeleteCmd) Run(
 	machine *provider.Machine,
 	logs log.Logger,
 ) error {
-	return opentelekomcloud.Delete(opentelekomcloudProvider)
+	return opentelekomcloudProvider.Delete()
 }
