@@ -146,7 +146,10 @@ func (o *OpenTelekomCloudProvider) Start() error {
 		return err
 	}
 
-	o.startServer(server.ID)
+	if server.Status != "ACTIVE" {
+		o.startServer(server.ID)
+	}
+
 	return nil
 }
 
@@ -173,7 +176,9 @@ func (o *OpenTelekomCloudProvider) Stop() error {
 		return err
 	}
 
-	o.stopServer(server.ID)
+	if server.Status == "ACTIVE" {
+		o.stopServer(server.ID)
+	}
 
 	return nil
 }
