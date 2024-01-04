@@ -100,7 +100,7 @@ func NewProvider(log log.Logger, init bool) (*OpenTelekomCloudProvider, error) {
 	return openTelekomCloudProvider, nil
 }
 
-func (o *OpenTelekomCloudProvider) GetDevpodRunningInstance() (*servers.Server, error) {
+func (o *OpenTelekomCloudProvider) GetDevPodRunningInstance() (*servers.Server, error) {
 	server, err := o.getServer(o.Config.MachineID)
 	if err != nil {
 		return nil, err
@@ -109,17 +109,17 @@ func (o *OpenTelekomCloudProvider) GetDevpodRunningInstance() (*servers.Server, 
 	return server, nil
 }
 
-func (o *OpenTelekomCloudProvider) GetDevpodRunningInstanceElasticIp(server *servers.Server) (string, error) {
+func (o *OpenTelekomCloudProvider) GetDevPodRunningInstanceConnectionAddr(server *servers.Server) (string, int, error) {
 	if server == nil {
-		dpi, err := o.GetDevpodRunningInstance()
+		dpi, err := o.GetDevPodRunningInstance()
 		if err != nil {
-			return "", err
+			return "", -1, err
 		}
 
 		server = dpi
 	}
 
-	return o.extractElasticIpAddress(*server)
+	return o.getExternalIpAndPort(*server)
 }
 
 func (o *OpenTelekomCloudProvider) Create() error {
@@ -132,7 +132,7 @@ func (o *OpenTelekomCloudProvider) Create() error {
 }
 
 func (o *OpenTelekomCloudProvider) Delete() error {
-	server, err := o.GetDevpodRunningInstance()
+	server, err := o.GetDevPodRunningInstance()
 	if err != nil {
 		return err
 	}
@@ -141,7 +141,7 @@ func (o *OpenTelekomCloudProvider) Delete() error {
 }
 
 func (o *OpenTelekomCloudProvider) Start() error {
-	server, err := o.GetDevpodRunningInstance()
+	server, err := o.GetDevPodRunningInstance()
 	if err != nil {
 		return err
 	}
@@ -154,7 +154,7 @@ func (o *OpenTelekomCloudProvider) Start() error {
 }
 
 func (o *OpenTelekomCloudProvider) Status() (client.Status, error) {
-	devPodInstance, err := o.GetDevpodRunningInstance()
+	devPodInstance, err := o.GetDevPodRunningInstance()
 	if err != nil {
 		return client.StatusNotFound, nil
 	}
@@ -171,7 +171,7 @@ func (o *OpenTelekomCloudProvider) Status() (client.Status, error) {
 }
 
 func (o *OpenTelekomCloudProvider) Stop() error {
-	server, err := o.GetDevpodRunningInstance()
+	server, err := o.GetDevPodRunningInstance()
 	if err != nil {
 		return err
 	}

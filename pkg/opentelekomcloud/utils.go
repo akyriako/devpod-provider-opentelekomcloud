@@ -4,6 +4,8 @@ import (
 	"encoding/base64"
 	"fmt"
 	"github.com/loft-sh/devpod/pkg/ssh"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/common/tags"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/extensions/bootfromvolume"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/extensions/floatingips"
@@ -11,12 +13,14 @@ import (
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/extensions/secgroups"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/extensions/startstop"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/servers"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/dnatrules"
 	"time"
 )
 
 const (
 	devpodTagKey      = "devpod"
 	devpodKeyPairName = "KeyPair-DevPod"
+	dnatRuleIdTagKey  = "dnat"
 )
 
 func (o *OpenTelekomCloudProvider) getAllServers() ([]servers.Server, error) {
@@ -36,7 +40,7 @@ func (o *OpenTelekomCloudProvider) getAllServers() ([]servers.Server, error) {
 	return allServers, nil
 }
 
-func (o *OpenTelekomCloudProvider) getServer(machineId string) (*servers.Server, error) {
+func (o *OpenTelekomCloudProvider) getServer(serverId string) (*servers.Server, error) {
 	allServers, err := o.getAllServers()
 	if err != nil {
 		return nil, err
@@ -50,13 +54,13 @@ func (o *OpenTelekomCloudProvider) getServer(machineId string) (*servers.Server,
 
 		rts := resourceTags[:]
 		for _, tag := range rts {
-			if tag.Key == devpodTagKey && tag.Value == o.Config.MachineID {
+			if tag.Key == devpodTagKey && tag.Value == serverId {
 				return &server, nil
 			}
 		}
 	}
 
-	return nil, fmt.Errorf("found no devpod machine with id: %s", machineId)
+	return nil, fmt.Errorf("found no devpod machine with id: %s", serverId)
 }
 
 func (o *OpenTelekomCloudProvider) startServer(serverId string) {
@@ -234,19 +238,113 @@ func (o *OpenTelekomCloudProvider) deleteElasticIpAddress(floatingIpId string) e
 	return nil
 }
 
-func (o *OpenTelekomCloudProvider) extractElasticIpAddress(server servers.Server) (string, error) {
+//func (o *OpenTelekomCloudProvider) extractElasticIpAddress(server servers.Server) (string, error) {
+//	for _, v1 := range server.Addresses {
+//		addresses := v1.([]interface{})
+//		for _, v2 := range addresses {
+//			address := v2.(map[string]interface{})
+//			if address["OS-EXT-IPS:type"] == "floating" {
+//				eip := address["addr"].(string)
+//				return eip, nil
+//			}
+//		}
+//	}
+//
+//	return "", fmt.Errorf("no floating ip found for server: %s/%s", server.Name, server.ID)
+//}
+
+func (o *OpenTelekomCloudProvider) getExternalIpAndPort(server servers.Server) (string, int, error) {
 	for _, v1 := range server.Addresses {
 		addresses := v1.([]interface{})
 		for _, v2 := range addresses {
 			address := v2.(map[string]interface{})
 			if address["OS-EXT-IPS:type"] == "floating" {
-				eip := address["addr"].(string)
-				return eip, nil
+				o.Config.PublicIp = address["addr"].(string)
+			} else if address["OS-EXT-IPS:type"] == "fixed" {
+				o.Config.PrivateIp = address["addr"].(string)
 			}
 		}
 	}
 
-	return "", fmt.Errorf("no floating ip found for server: %s/%s", server.Name, server.ID)
+	if o.Config.UseNatGateway() {
+		resourceTags, err := tags.Get(o.ecsv1ServiceClient, "cloudservers", server.ID).Extract()
+		if err != nil {
+			return "", -1, err
+		}
+
+		rts := resourceTags[:]
+		for _, tag := range rts {
+			if tag.Key == dnatRuleIdTagKey {
+				natPublicIp, outsidePort, err := o.getDnatRuleElasticIpAddress(tag.Value)
+				if err != nil {
+					return "", -1, err
+				}
+
+				o.Config.PublicIp = natPublicIp
+				o.Config.Port = outsidePort
+				break
+			}
+		}
+	}
+
+	if o.Config.PublicIp == "" {
+		return "", -1, fmt.Errorf("no public ip was found for: %s", server.Name)
+	}
+
+	return o.Config.PublicIp, o.Config.Port, nil
+}
+
+//func (o *OpenTelekomCloudProvider) getServerIpAddresses(server servers.Server) error {
+//	for _, v1 := range server.Addresses {
+//		addresses := v1.([]interface{})
+//		for _, v2 := range addresses {
+//			address := v2.(map[string]interface{})
+//			if address["OS-EXT-IPS:type"] == "floating" {
+//				o.Config.PublicIp = address["addr"].(string)
+//			} else if address["OS-EXT-IPS:type"] == "fixed" {
+//				o.Config.PrivateIp = address["addr"].(string)
+//			}
+//		}
+//	}
+//
+//	if o.Config.UseNatGateway() {
+//		resourceTags, err := tags.Get(o.ecsv1ServiceClient, "cloudservers", server.ID).Extract()
+//		if err != nil {
+//			return err
+//		}
+//
+//		rts := resourceTags[:]
+//		for _, tag := range rts {
+//			if tag.Key == dnatRuleIdTagKey {
+//				natPublicIp, outsidePort, err := o.getDnatRuleElasticIpAddress(tag.Value)
+//				if err != nil {
+//					return err
+//				}
+//
+//				o.Config.PublicIp = natPublicIp
+//				o.Config.Port = outsidePort
+//				break
+//			}
+//		}
+//	}
+//
+//	return nil
+//}
+
+func (o *OpenTelekomCloudProvider) getDnatRuleElasticIpAddress(dnatRuleId string) (string, int, error) {
+	natv2sc, err := openstack.NewNatV2(o.Client, golangsdk.EndpointOpts{
+		Region: o.Config.Region,
+	})
+	if err != nil {
+		return "", -1, fmt.Errorf("failed to acquire a NewNatV2 service client: %s", err.Error())
+	}
+
+	dnatRule, err := dnatrules.Get(natv2sc, dnatRuleId).Extract()
+	if err != nil {
+		return "", -1, err
+	}
+
+	return dnatRule.FloatingIpAddress, dnatRule.ExternalServicePort, nil
 }
 
 func (o *OpenTelekomCloudProvider) addSecurityGroup(server *servers.Server) error {

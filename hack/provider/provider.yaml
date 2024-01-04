@@ -16,6 +16,7 @@ optionGroups:
       - OTC_DISK_SIZE
       - OTC_NETWORK_ID
       - OTC_SECURITYGROUP_ID
+      - OTC_NATGATEWAY_ID
     name: "Open Telekom Cloud Elastic Cloud Server Options"
   - options:
       - AGENT_PATH
@@ -51,6 +52,9 @@ options:
   OTC_NETWORK_ID:
     description: The Open Telekom Cloud Subnet ID to place the VM into
     required: true
+
+  OTC_NATGATEWAY_ID:
+    description: The Open Telekom Cloud NAT Gateway ID to use instead of individual Elastic IPs
 
   OTC_SECURITYGROUP_ID:
     description: The Open Telekom Cloud Security Group ID to use with this VM
