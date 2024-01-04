@@ -68,6 +68,7 @@ func FromEnv(init bool) (*Options, error) {
 		return nil, err
 	}
 
+	// TODO: add eip option, not mandatory, except for nat scenario.
 	retOptions.NatGatewayId = os.Getenv(OTC_NATGATEWAY_ID)
 	if retOptions.UseNatGateway() {
 		retOptions.Port = DefaultSshPort
