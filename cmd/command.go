@@ -59,19 +59,18 @@ func (cmd *CommandCmd) Run(
 	}
 
 	// get instance
-	instance, err := opentelekomcloudProvider.GetDevpodInstance()
+	instance, err := opentelekomcloudProvider.GetDevpodRunningInstance()
 	if err != nil {
 		return err
 	}
 
 	// get elastic ip
-	floatingIp, err := opentelekomcloudProvider.GetDevpodInstanceElasticIp(instance)
+	floatingIp, err := opentelekomcloudProvider.GetDevpodRunningInstanceElasticIp(instance)
 	if err != nil {
 		return err
 	}
 
-	sshClient, err := ssh.NewSSHClient("ubuntu", floatingIp+":22", privateKey)
-
+	sshClient, err := ssh.NewSSHClient("devpod", floatingIp+":22", privateKey)
 	if err != nil {
 		return errors.Wrap(err, "create ssh client")
 	}

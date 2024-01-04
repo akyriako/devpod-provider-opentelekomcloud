@@ -100,7 +100,7 @@ func NewProvider(log log.Logger, init bool) (*OpenTelekomCloudProvider, error) {
 	return openTelekomCloudProvider, nil
 }
 
-func (o *OpenTelekomCloudProvider) GetDevpodInstance() (*servers.Server, error) {
+func (o *OpenTelekomCloudProvider) GetDevpodRunningInstance() (*servers.Server, error) {
 	server, err := o.getServer(o.Config.MachineID)
 	if err != nil {
 		return nil, err
@@ -109,9 +109,9 @@ func (o *OpenTelekomCloudProvider) GetDevpodInstance() (*servers.Server, error) 
 	return server, nil
 }
 
-func (o *OpenTelekomCloudProvider) GetDevpodInstanceElasticIp(server *servers.Server) (string, error) {
+func (o *OpenTelekomCloudProvider) GetDevpodRunningInstanceElasticIp(server *servers.Server) (string, error) {
 	if server == nil {
-		dpi, err := o.GetDevpodInstance()
+		dpi, err := o.GetDevpodRunningInstance()
 		if err != nil {
 			return "", err
 		}
@@ -132,7 +132,7 @@ func (o *OpenTelekomCloudProvider) Create() error {
 }
 
 func (o *OpenTelekomCloudProvider) Delete() error {
-	server, err := o.GetDevpodInstance()
+	server, err := o.GetDevpodRunningInstance()
 	if err != nil {
 		return err
 	}
@@ -141,7 +141,7 @@ func (o *OpenTelekomCloudProvider) Delete() error {
 }
 
 func (o *OpenTelekomCloudProvider) Start() error {
-	server, err := o.GetDevpodInstance()
+	server, err := o.GetDevpodRunningInstance()
 	if err != nil {
 		return err
 	}
@@ -154,7 +154,7 @@ func (o *OpenTelekomCloudProvider) Start() error {
 }
 
 func (o *OpenTelekomCloudProvider) Status() (client.Status, error) {
-	devPodInstance, err := o.GetDevpodInstance()
+	devPodInstance, err := o.GetDevpodRunningInstance()
 	if err != nil {
 		return client.StatusNotFound, nil
 	}
@@ -171,7 +171,7 @@ func (o *OpenTelekomCloudProvider) Status() (client.Status, error) {
 }
 
 func (o *OpenTelekomCloudProvider) Stop() error {
-	server, err := o.GetDevpodInstance()
+	server, err := o.GetDevpodRunningInstance()
 	if err != nil {
 		return err
 	}

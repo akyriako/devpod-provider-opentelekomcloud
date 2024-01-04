@@ -1,7 +1,6 @@
 package opentelekomcloud
 
 import (
-	"bytes"
 	"encoding/base64"
 	"fmt"
 	"github.com/loft-sh/devpod/pkg/ssh"
@@ -12,16 +11,12 @@ import (
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/extensions/secgroups"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/extensions/startstop"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/servers"
-	"slices"
-	"strings"
 	"time"
 )
 
 const (
-	machineIdKeyValue   = "machineID"
-	devpodKeyValue      = "createdFrom"
-	devpodTagValue      = "devpod"
-	devpodPublicKeyName = "KeyPair-DevPod"
+	devpodTagKey      = "devpod"
+	devpodKeyPairName = "KeyPair-DevPod"
 )
 
 func (o *OpenTelekomCloudProvider) getAllServers() ([]servers.Server, error) {
@@ -55,13 +50,8 @@ func (o *OpenTelekomCloudProvider) getServer(machineId string) (*servers.Server,
 
 		rts := resourceTags[:]
 		for _, tag := range rts {
-			if tag.Key == machineIdKeyValue && tag.Value == o.Config.MachineID {
-				if slices.Contains(rts, tags.ResourceTag{
-					Key:   devpodKeyValue,
-					Value: devpodTagValue,
-				}) {
-					return &server, nil
-				}
+			if tag.Key == devpodTagKey && tag.Value == o.Config.MachineID {
+				return &server, nil
 			}
 		}
 	}
@@ -82,6 +72,7 @@ func (o *OpenTelekomCloudProvider) stopServer(serverId string) {
 }
 
 func (o *OpenTelekomCloudProvider) createServer() (*servers.Server, error) {
+	// get public key
 	publicKeyBase, err := ssh.GetPublicKeyBase(o.Config.MachineFolder)
 	if err != nil {
 		return nil, fmt.Errorf("loading public key failed: %w", err)
@@ -92,47 +83,19 @@ func (o *OpenTelekomCloudProvider) createServer() (*servers.Server, error) {
 		return nil, err
 	}
 
-	keyPair, err := o.createKeyPair(string(publicKey))
+	// create a keypair
+	keyPair, err := o.createKeyPair(publicKey)
 	if err != nil {
 		return nil, err
 	}
 
-	//var fip *floatingips.FloatingIP
-	//if o.Config.FloatingIpID == "" {
-	//	fip, err = o.createElasticIpAddress()
-	//	if err != nil {
-	//		return nil, err
-	//	}
-	//	//defer o.deleteElasticIpAddress(fip.ID)
-	//} else {
-	//	fip, err = o.getElasticIpAddress(o.Config.FloatingIpID)
-	//	if err != nil {
-	//		return nil, err
-	//	}
-	//}
-
+	// create a floating ip
 	fip, err := o.createElasticIpAddress()
 	if err != nil {
 		return nil, err
 	}
 
-	cloudConfigReader := strings.NewReader(
-		fmt.Sprintf(`#cloud-config
-								users:
-								- name: devpod
-								  shell: /bin/bash
-								  groups: [ sudo, docker ]
-								  ssh_authorized_keys:
-								  - %s
-								  sudo: [ "ALL=(ALL) NOPASSWD:ALL" ]`,
-			string(publicKey)))
-
-	buf := new(bytes.Buffer)
-	_, err = buf.ReadFrom(cloudConfigReader)
-	if err != nil {
-		return nil, err
-	}
-
+	// define the details of the block device that will boot the server
 	blockDevices := []bootfromvolume.BlockDevice{
 		bootfromvolume.BlockDevice{
 			DeleteOnTermination: true,
@@ -143,11 +106,12 @@ func (o *OpenTelekomCloudProvider) createServer() (*servers.Server, error) {
 		},
 	}
 
+	// define the server and network details
 	serverCreateOpts := servers.CreateOpts{
 		Name:      o.Config.MachineID,
 		FlavorRef: o.Config.FlavorId,
 		Networks:  []servers.Network{{UUID: o.Config.SubnetId}},
-		UserData:  buf.Bytes(),
+		UserData:  []byte(o.getInjectKeyPairScript(publicKey)),
 	}
 
 	keypairOpts := keypairs.CreateOptsExt{
@@ -171,24 +135,23 @@ func (o *OpenTelekomCloudProvider) createServer() (*servers.Server, error) {
 		return nil, err
 	}
 
+	// associate the server with the floating ip
 	err = o.assosiateElasticIpAddress(server, fip)
 	if err != nil {
 		return nil, err
 	}
 
+	// add an *existing* security group (allow 22, and preferrably ICMP as well)
 	err = o.addSecurityGroup(server)
 	if err != nil {
 		return nil, err
 	}
 
+	// add tags to the server
 	tagList := []tags.ResourceTag{
 		{
-			Key:   machineIdKeyValue,
+			Key:   devpodTagKey,
 			Value: o.Config.MachineID,
-		},
-		{
-			Key:   devpodKeyValue,
-			Value: devpodTagValue,
 		},
 	}
 	if err := tags.Create(o.ecsv1ServiceClient, "cloudservers", server.ID, tagList).ExtractErr(); err != nil {
@@ -290,12 +253,12 @@ func (o *OpenTelekomCloudProvider) addSecurityGroup(server *servers.Server) erro
 	return nil
 }
 
-func (o *OpenTelekomCloudProvider) createKeyPair(publicKey string) (*keypairs.KeyPair, error) {
-	keyPair, err := keypairs.Get(o.ecsv2ServiceClient, devpodPublicKeyName).Extract()
+func (o *OpenTelekomCloudProvider) createKeyPair(publicKey []byte) (*keypairs.KeyPair, error) {
+	keyPair, err := keypairs.Get(o.ecsv2ServiceClient, devpodKeyPairName).Extract()
 	if err != nil {
 		createOpts := keypairs.CreateOpts{
-			Name:      devpodPublicKeyName,
-			PublicKey: publicKey,
+			Name:      devpodKeyPairName,
+			PublicKey: string(publicKey),
 		}
 
 		keyPair, err = keypairs.Create(o.ecsv2ServiceClient, createOpts).Extract()
@@ -305,4 +268,23 @@ func (o *OpenTelekomCloudProvider) createKeyPair(publicKey string) (*keypairs.Ke
 	}
 
 	return keyPair, nil
+}
+
+func (o *OpenTelekomCloudProvider) getInjectKeyPairScript(publicKey []byte) string {
+	resultScript := `#!/bin/sh
+useradd devpod -d /home/devpod
+mkdir -p /home/devpod
+if grep -q sudo /etc/groups; then
+	usermod -aG sudo devpod
+elif grep -q wheel /etc/groups; then
+	usermod -aG wheel devpod
+fi
+echo "devpod ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/91-devpod
+mkdir -p /home/devpod/.ssh
+echo "` + string(publicKey) + `" >> /home/devpod/.ssh/authorized_keys
+chmod 0700 /home/devpod/.ssh
+chmod 0600 /home/devpod/.ssh/authorized_keys
+chown -R devpod:devpod /home/devpod`
+
+	return base64.StdEncoding.EncodeToString([]byte(resultScript))
 }
