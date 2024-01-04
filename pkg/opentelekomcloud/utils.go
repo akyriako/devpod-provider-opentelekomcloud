@@ -95,6 +95,7 @@ func (o *OpenTelekomCloudProvider) createServer() (*servers.Server, error) {
 		return nil, err
 	}
 
+	// TODO: get ImageUUID by ImageRefName - at the moment suggested values are not working
 	// define the details of the block device that will boot the server
 	blockDevices := []bootfromvolume.BlockDevice{
 		bootfromvolume.BlockDevice{
@@ -135,18 +136,22 @@ func (o *OpenTelekomCloudProvider) createServer() (*servers.Server, error) {
 		return nil, err
 	}
 
+	// TODO: figure out why EIP is created with default bandwidth 1000Mbits/sec
+	// TODO: figure out why EIP is not automatically deleted when instance is deleted
 	// associate the server with the floating ip
 	err = o.assosiateElasticIpAddress(server, fip)
 	if err != nil {
 		return nil, err
 	}
 
+	// TODO: create a security group if it the env variable is empty
 	// add an *existing* security group (allow 22, and preferrably ICMP as well)
 	err = o.addSecurityGroup(server)
 	if err != nil {
 		return nil, err
 	}
 
+	// TODO: create a separate method to get the necessary resource tags
 	// add tags to the server
 	tagList := []tags.ResourceTag{
 		{
@@ -270,6 +275,7 @@ func (o *OpenTelekomCloudProvider) createKeyPair(publicKey []byte) (*keypairs.Ke
 	return keyPair, nil
 }
 
+// TODO: make this script generic (for docker installation), at the moment covers only ubuntu
 func (o *OpenTelekomCloudProvider) getInjectKeyPairScript(publicKey []byte) string {
 	resultScript := `#!/bin/sh
 useradd devpod -s /bin/bash -d /home/devpod
