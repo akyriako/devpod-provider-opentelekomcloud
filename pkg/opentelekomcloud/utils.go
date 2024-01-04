@@ -272,7 +272,7 @@ func (o *OpenTelekomCloudProvider) createKeyPair(publicKey []byte) (*keypairs.Ke
 
 func (o *OpenTelekomCloudProvider) getInjectKeyPairScript(publicKey []byte) string {
 	resultScript := `#!/bin/sh
-useradd devpod -d /home/devpod
+useradd devpod -s /bin/bash -d /home/devpod
 mkdir -p /home/devpod
 if grep -q sudo /etc/groups; then
 	usermod -aG sudo devpod
@@ -284,7 +284,10 @@ mkdir -p /home/devpod/.ssh
 echo "` + string(publicKey) + `" >> /home/devpod/.ssh/authorized_keys
 chmod 0700 /home/devpod/.ssh
 chmod 0600 /home/devpod/.ssh/authorized_keys
-chown -R devpod:devpod /home/devpod`
+chown -R devpod:devpod /home/devpod
+sudo snap install docker
+sudo groupadd docker
+sudo usermod -aG docker devpod`
 
 	return base64.StdEncoding.EncodeToString([]byte(resultScript))
 }
