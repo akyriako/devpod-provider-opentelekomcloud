@@ -47,6 +47,7 @@ github.com/loft-sh/devpod/pkg/encoding
 github.com/loft-sh/devpod/pkg/git
 github.com/loft-sh/devpod/pkg/id
 github.com/loft-sh/devpod/pkg/provider
+github.com/loft-sh/devpod/pkg/random
 github.com/loft-sh/devpod/pkg/ssh
 github.com/loft-sh/devpod/pkg/stdio
 github.com/loft-sh/devpod/pkg/telemetry
@@ -99,7 +100,6 @@ github.com/opentelekomcloud/gophertelekomcloud/openstack/identity/v3/tokens
 github.com/opentelekomcloud/gophertelekomcloud/openstack/ims/v1/others
 github.com/opentelekomcloud/gophertelekomcloud/openstack/ims/v2/images
 github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/dnatrules
-github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/natgateways
 github.com/opentelekomcloud/gophertelekomcloud/openstack/utils
 github.com/opentelekomcloud/gophertelekomcloud/pagination
 # github.com/pkg/errors v0.9.1

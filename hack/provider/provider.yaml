@@ -17,6 +17,7 @@ optionGroups:
       - OTC_NETWORK_ID
       - OTC_SECURITYGROUP_ID
       - OTC_NATGATEWAY_ID
+      - OTC_FLOATINGIP_ID
     name: "Open Telekom Cloud Elastic Cloud Server Options"
   - options:
       - AGENT_PATH
@@ -55,6 +56,9 @@ options:
 
   OTC_NATGATEWAY_ID:
     description: The Open Telekom Cloud NAT Gateway ID to use instead of individual Elastic IPs
+
+  OTC_FLOATINGIP_ID:
+    description: The Open Telekom Cloud NAT Elastic IP ID to associate with NAT Gateway DNAT Rules
 
   OTC_SECURITYGROUP_ID:
     description: The Open Telekom Cloud Security Group ID to use with this VM

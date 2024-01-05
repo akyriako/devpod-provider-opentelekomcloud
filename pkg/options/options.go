@@ -9,16 +9,20 @@ import (
 )
 
 var (
-	OTC_TENANT_NAME      = "OTC_TENANT_NAME"
-	OTC_REGION           = "OTC_REGION"
+	OTC_TENANT_NAME = "OTC_TENANT_NAME"
+	OTC_REGION      = "OTC_REGION"
+
 	OTC_NETWORK_ID       = "OTC_NETWORK_ID"
 	OTC_NATGATEWAY_ID    = "OTC_NATGATEWAY_ID"
+	OTC_FLOATINGIP_ID    = "OTC_FLOATINGIP_ID"
 	OTC_SECURITYGROUP_ID = "OTC_SECURITYGROUP_ID"
-	OTC_FLAVOR_ID        = "OTC_FLAVOR_ID"
-	OTC_DISK_IMAGE       = "OTC_DISK_IMAGE"
-	OTC_DISK_SIZE        = "OTC_DISK_SIZE"
-	MACHINE_ID           = "MACHINE_ID"
-	MACHINE_FOLDER       = "MACHINE_FOLDER"
+
+	OTC_FLAVOR_ID  = "OTC_FLAVOR_ID"
+	OTC_DISK_IMAGE = "OTC_DISK_IMAGE"
+	OTC_DISK_SIZE  = "OTC_DISK_SIZE"
+
+	MACHINE_ID     = "MACHINE_ID"
+	MACHINE_FOLDER = "MACHINE_FOLDER"
 )
 
 const (
@@ -32,6 +36,7 @@ type Options struct {
 	SubnetId        string
 	SecurityGroupId string
 	NatGatewayId    string
+	FloatingIpId    string
 
 	PublicIp  string
 	PrivateIp string
@@ -72,6 +77,11 @@ func FromEnv(init bool) (*Options, error) {
 	retOptions.NatGatewayId = os.Getenv(OTC_NATGATEWAY_ID)
 	if !retOptions.UseNatGateway() {
 		retOptions.Port = DefaultSshPort
+	} else {
+		retOptions.FloatingIpId, err = fromEnvOrError(OTC_FLOATINGIP_ID)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	retOptions.SecurityGroupId, err = fromEnvOrError(OTC_SECURITYGROUP_ID)
