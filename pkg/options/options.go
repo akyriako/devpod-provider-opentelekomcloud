@@ -45,7 +45,7 @@ type Options struct {
 }
 
 func (o *Options) UseNatGateway() bool {
-	return strings.TrimSpace(o.NatGatewayId) == ""
+	return strings.TrimSpace(o.NatGatewayId) != ""
 }
 
 func FromEnv(init bool) (*Options, error) {
@@ -70,7 +70,7 @@ func FromEnv(init bool) (*Options, error) {
 
 	// TODO: add eip option, not mandatory, except for nat scenario.
 	retOptions.NatGatewayId = os.Getenv(OTC_NATGATEWAY_ID)
-	if retOptions.UseNatGateway() {
+	if !retOptions.UseNatGateway() {
 		retOptions.Port = DefaultSshPort
 	}
 
