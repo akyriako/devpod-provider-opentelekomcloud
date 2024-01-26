@@ -25,7 +25,7 @@ github.com/ghodss/yaml
 # github.com/go-logr/logr v1.2.4
 ## explicit; go 1.16
 github.com/go-logr/logr
-# github.com/google/uuid v1.3.0
+# github.com/google/uuid v1.3.1
 ## explicit
 github.com/google/uuid
 # github.com/inconshreveable/mousetrap v1.1.0
@@ -65,7 +65,7 @@ github.com/loft-sh/log/terminal
 # github.com/mattn/go-colorable v0.1.13
 ## explicit; go 1.15
 github.com/mattn/go-colorable
-# github.com/mattn/go-isatty v0.0.19
+# github.com/mattn/go-isatty v0.0.20
 ## explicit; go 1.15
 github.com/mattn/go-isatty
 # github.com/mgutz/ansi v0.0.0-20200706080929-d51e80ef957d
@@ -78,8 +78,8 @@ github.com/mitchellh/go-homedir
 ## explicit; go 1.18
 github.com/moby/term
 github.com/moby/term/windows
-# github.com/opentelekomcloud/gophertelekomcloud v0.8.0
-## explicit; go 1.14
+# github.com/opentelekomcloud/gophertelekomcloud v0.8.0 => github.com/opentelekomcloud/gophertelekomcloud v0.8.1-0.20240126162612-0fb6b10e8415
+## explicit; go 1.20
 github.com/opentelekomcloud/gophertelekomcloud
 github.com/opentelekomcloud/gophertelekomcloud/internal/build
 github.com/opentelekomcloud/gophertelekomcloud/internal/extract
@@ -165,3 +165,4 @@ gopkg.in/square/go-jose.v2/jwt
 # gopkg.in/yaml.v2 v2.4.0
 ## explicit; go 1.15
 gopkg.in/yaml.v2
+# github.com/opentelekomcloud/gophertelekomcloud => github.com/opentelekomcloud/gophertelekomcloud v0.8.1-0.20240126162612-0fb6b10e8415

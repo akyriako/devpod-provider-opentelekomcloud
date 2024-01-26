@@ -669,6 +669,17 @@ func NewVpcEpV1(client *golangsdk.ProviderClient, eo golangsdk.EndpointOpts) (*g
 	return sc, err
 }
 
+// NewVpcV3 creates a ServiceClient that may be used with the v3 VPC service
+func NewVpcV3(client *golangsdk.ProviderClient, eo golangsdk.EndpointOpts) (*golangsdk.ServiceClient, error) {
+	sc, err := initClientOpts(client, eo, "vpc")
+	if err != nil {
+		return nil, err
+	}
+	sc.Endpoint = strings.Replace(sc.Endpoint, "v1", "v3", 1)
+	sc.ResourceBase = sc.Endpoint + "vpc/"
+	return sc, err
+}
+
 // NewNatV2 creates a ServiceClient that may be used with the v2 nat package.
 func NewNatV2(client *golangsdk.ProviderClient, eo golangsdk.EndpointOpts) (*golangsdk.ServiceClient, error) {
 	return initClientOpts(client, eo, "nat")
@@ -859,6 +870,15 @@ func NewSMNV2(client *golangsdk.ProviderClient, eo golangsdk.EndpointOpts) (*gol
 	return sc, err
 }
 
+// NewSMNV2Tags creates a ServiceClient that may be used to access the SMN tags service.
+func NewSMNV2Tags(client *golangsdk.ProviderClient, eo golangsdk.EndpointOpts) (*golangsdk.ServiceClient, error) {
+	sc, err := initClientOpts(client, eo, "smnv2")
+	if err != nil {
+		return nil, err
+	}
+	return sc, err
+}
+
 // NewCCEv1 creates a ServiceClient that may be used to access the CCE k8s service.
 func NewCCEv1(client *golangsdk.ProviderClient, eo golangsdk.EndpointOpts) (*golangsdk.ServiceClient, error) {
 	return initClientOpts(client, eo, "cce")
@@ -934,4 +954,18 @@ func NewSWRV2(client *golangsdk.ProviderClient, eo golangsdk.EndpointOpts) (*gol
 // NewTMSV1 creates a ServiceClient that may be used to access the TMS service.
 func NewTMSV1(client *golangsdk.ProviderClient, eo golangsdk.EndpointOpts) (*golangsdk.ServiceClient, error) {
 	return initClientOpts(client, eo, "tms")
+}
+
+func NewGaussDBV3(client *golangsdk.ProviderClient, eo golangsdk.EndpointOpts) (*golangsdk.ServiceClient, error) {
+	sc, err := initCommonServiceClient(client, eo, "gaussdb", "mysql/v3")
+	return sc, err
+}
+
+func NewDataArtsV11(client *golangsdk.ProviderClient, eo golangsdk.EndpointOpts) (*golangsdk.ServiceClient, error) {
+	return initCommonServiceClient(client, eo, "cdm", "v1.1")
+}
+
+func NewAPIGW(client *golangsdk.ProviderClient, eo golangsdk.EndpointOpts) (*golangsdk.ServiceClient, error) {
+	sc, err := initCommonServiceClient(client, eo, "apig", "v2")
+	return sc, err
 }

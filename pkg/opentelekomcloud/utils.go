@@ -382,7 +382,7 @@ func (o *OpenTelekomCloudProvider) getServerPortId(serverId string) (string, err
 }
 
 func (o *OpenTelekomCloudProvider) getDnatRuleElasticIpAddress(dnatRuleId string) (string, int, error) {
-	dnatRule, err := dnatrules.Get(o.natv2ServiceClient, dnatRuleId).Extract()
+	dnatRule, err := dnatrules.Get(o.natv2ServiceClient, dnatRuleId)
 	if err != nil {
 		return "", -1, err
 	}
@@ -397,8 +397,17 @@ func (o *OpenTelekomCloudProvider) createDnatRule(serverId string) (string, erro
 	}
 	o.Config.ServerPortId = serverPortId
 
+	dnatRules, err := o.getDnatRules(o.Config.NatGatewayId)
+	if err != nil {
+		return "", err
+	}
+
 	internalServicePort := options.DefaultSshPort
 	externalServicePort := random.InRange(dnatRuleMinOutsidePort, dnatRuleMaxOutsidePort)
+
+	for o.isPortAlreadyUsedInDnatRule(dnatRules, externalServicePort) {
+		externalServicePort = random.InRange(dnatRuleMinOutsidePort, dnatRuleMaxOutsidePort)
+	}
 
 	createOpts := dnatrules.CreateOpts{
 		NatGatewayID:        o.Config.NatGatewayId,
@@ -409,7 +418,7 @@ func (o *OpenTelekomCloudProvider) createDnatRule(serverId string) (string, erro
 		Protocol:            "TCP",
 	}
 
-	dnatRule, err := dnatrules.Create(o.natv2ServiceClient, createOpts).Extract()
+	dnatRule, err := dnatrules.Create(o.natv2ServiceClient, createOpts)
 	if err != nil {
 		return "", err
 	}
@@ -418,12 +427,33 @@ func (o *OpenTelekomCloudProvider) createDnatRule(serverId string) (string, erro
 }
 
 func (o *OpenTelekomCloudProvider) deleteDnatRule(dnatRuleId string) error {
-	err := dnatrules.Delete(o.natv2ServiceClient, dnatRuleId).ExtractErr()
+	err := dnatrules.Delete(o.natv2ServiceClient, dnatRuleId)
 	if err != nil {
 		return err
 	}
 
 	return nil
+}
+
+func (o *OpenTelekomCloudProvider) getDnatRules(natGatewayId string) ([]dnatrules.DnatRule, error) {
+	dnatRules, err := dnatrules.List(o.natv2ServiceClient, dnatrules.ListOpts{
+		NatGatewayId: natGatewayId,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return dnatRules, nil
+}
+
+func (o *OpenTelekomCloudProvider) isPortAlreadyUsedInDnatRule(dnatRules []dnatrules.DnatRule, port int) bool {
+	for _, dnatRule := range dnatRules {
+		if dnatRule.ExternalServicePort == port {
+			return true
+		}
+	}
+
+	return false
 }
 
 func (o *OpenTelekomCloudProvider) addSecurityGroup(serverId string) error {
