@@ -9,7 +9,7 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/sethvargo/go-password v0.2.0
 	github.com/spf13/cobra v1.8.0
-	golang.org/x/crypto v0.17.0
+	golang.org/x/crypto v0.18.0
 )
 
 replace github.com/opentelekomcloud/gophertelekomcloud => github.com/opentelekomcloud/gophertelekomcloud v0.8.1-0.20240126162612-0fb6b10e8415
@@ -34,8 +34,8 @@ require (
 	github.com/moby/term v0.5.0 // indirect
 	github.com/sirupsen/logrus v1.9.3 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
-	golang.org/x/sys v0.15.0 // indirect
-	golang.org/x/term v0.15.0 // indirect
+	golang.org/x/sys v0.16.0 // indirect
+	golang.org/x/term v0.16.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1 // indirect
 	gopkg.in/square/go-jose.v2 v2.6.0 // indirect
