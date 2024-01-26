@@ -1,0 +1,161 @@
+name: opentelekomcloud
+version: v0.0.2-beta-debug
+description: |-
+  DevPod on OpenTelekomCloud
+icon: https://avatars.githubusercontent.com/u/19344672?s=200&v=4
+optionGroups:
+  - options:
+      - OTC_ACCESS_KEY
+      - OTC_SECRET_KEY
+      - OTC_TENANT_NAME
+      - OTC_REGION
+    name: "Open Telekom Cloud Tenant Options"
+  - options:
+      - OTC_FLAVOR_ID
+      - OTC_DISK_IMAGE
+      - OTC_DISK_SIZE
+      - OTC_NETWORK_ID
+      - OTC_SECURITYGROUP_ID
+      - OTC_NATGATEWAY_ID
+      - OTC_FLOATINGIP_ID
+    name: "Open Telekom Cloud Elastic Cloud Server Options"
+  - options:
+      - AGENT_PATH
+      - AGENT_DATA_PATH
+      - INACTIVITY_TIMEOUT
+      - INJECT_DOCKER_CREDENTIALS
+      - INJECT_GIT_CREDENTIALS
+    name: "Agent Options"
+options:
+  OTC_ACCESS_KEY:
+    description: The Open Telekom Cloud Access Key
+    required: true
+    password: true
+
+  OTC_SECRET_KEY:
+    description: The Open Telekom Cloud Secret Key
+    required: true
+    password: true
+
+  OTC_TENANT_NAME:
+    description: The Open Telekom Cloud Tenant Name
+    required: true
+
+  OTC_REGION:
+    description: The Open Telekom Cloud Region (e.g. eu-de)
+    required: true
+    default: eu-de
+    suggestions:
+      - eu-de
+      - eu-nl
+      - eu-ch
+
+  OTC_NETWORK_ID:
+    description: The Open Telekom Cloud Subnet ID to place the VM into
+    required: true
+
+  OTC_NATGATEWAY_ID:
+    description: The Open Telekom Cloud NAT Gateway ID to use instead of individual Elastic IPs
+
+  OTC_FLOATINGIP_ID:
+    description: The Open Telekom Cloud NAT Elastic IP ID to associate with NAT Gateway DNAT Rules
+
+  OTC_SECURITYGROUP_ID:
+    description: The Open Telekom Cloud Security Group ID to use with this VM
+    required: true
+
+  OTC_DISK_SIZE:
+    description: Virtual Machine's Disk Size (in GB)
+    required: true
+    default: "40"
+
+  OTC_DISK_IMAGE:
+    description: Virtual Machine's Disk Image
+    default: Standard_Ubuntu_22.04_latest
+    suggestions:
+      - Standard_Ubuntu_22.04_latest
+      - Standard_Debian_11_latest
+      - Enterprise_RedHat_9_latest
+      - Standard_Fedora_38_latest
+
+  OTC_FLAVOR_ID:
+    description: The Open Telekom Cloud Flavor to use for sizing this VM
+    default: s3.large.2
+    suggestions:
+      - s3.medium.1
+      - s3.medium.2
+      - s3.medium.4
+      - s3.medium.8
+      - s3.large.1
+      - s3.large.2
+      - s3.large.4
+      - s3.large.8
+      - s3.xlarge.1
+      - s3.xlarge.2
+      - s3.xlarge.4
+      - s3.xlarge.8
+
+  INACTIVITY_TIMEOUT:
+    description: If defined, will automatically stop the VM after the inactivity period.
+    default: 10m
+  INJECT_GIT_CREDENTIALS:
+    description: "If DevPod should inject git credentials into the remote host."
+    default: "true"
+  INJECT_DOCKER_CREDENTIALS:
+    description: "If DevPod should inject docker credentials into the remote host."
+    default: "true"
+  AGENT_PATH:
+    description: The path where to inject the DevPod agent to.
+    default: /home/devpod/.devpod/devpod
+  AGENT_DATA_PATH:
+    description: The path where to store the agent data.
+    default: /home/devpod/.devpod/agent
+agent:
+  path: ${AGENT_PATH}
+  dataPath: ${AGENT_DATA_PATH}
+  inactivityTimeout: ${INACTIVITY_TIMEOUT}
+  injectGitCredentials: ${INJECT_GIT_CREDENTIALS}
+  injectDockerCredentials: ${INJECT_DOCKER_CREDENTIALS}
+  binaries:
+    OTC_PROVIDER:
+      - os: linux
+        arch: amd64
+        path: https://github.com/akyriako/devpod-provider-opentelekomcloud/releases/download/v0.0.2-beta-debug/devpod-provider-opentelekomcloud-linux-amd64
+        checksum: ##CHECKSUM_LINUX_AMD64##
+      - os: linux
+        arch: arm64
+        path: https://github.com/akyriako/devpod-provider-opentelekomcloud/releases/download/v0.0.2-beta-debug/devpod-provider-opentelekomcloud-linux-arm64
+        checksum: ##CHECKSUM_LINUX_ARM64##
+  exec:
+    shutdown: |-
+      ${OTC_PROVIDER} stop
+#binaries:
+#  OTC_PROVIDER:
+#    - os: linux
+#      arch: amd64
+#      path: https://github.com/akyriako/devpod-provider-opentelekomcloud/releases/download/v0.0.2-beta-debug/devpod-provider-opentelekomcloud-linux-amd64
+#      checksum: ##CHECKSUM_LINUX_AMD64##
+#    - os: linux
+#      arch: arm64
+#      path: https://github.com/akyriako/devpod-provider-opentelekomcloud/releases/download/v0.0.2-beta-debug/devpod-provider-opentelekomcloud-linux-arm64
+#      checksum: ##CHECKSUM_LINUX_ARM64##
+#    - os: darwin
+#      arch: amd64
+#      path: https://github.com/akyriako/devpod-provider-opentelekomcloud/releases/download/v0.0.2-beta-debug/devpod-provider-opentelekomcloud-darwin-amd64
+#      checksum: ##CHECKSUM_DARWIN_AMD64##
+#    - os: darwin
+#      arch: arm64
+#      path: https://github.com/akyriako/devpod-provider-opentelekomcloud/releases/download/v0.0.2-beta-debug/devpod-provider-opentelekomcloud-darwin-arm64
+#      checksum: ##CHECKSUM_DARWIN_ARM64##
+#    - os: windows
+#      arch: amd64
+#      path: https://github.com/akyriako/devpod-provider-opentelekomcloud/releases/download/v0.0.2-beta-debug/devpod-provider-opentelekomcloud-windows-amd64.exe
+#      checksum: ##CHECKSUM_WINDOWS_AMD64##
+exec:
+  init: ${OTC_PROVIDER} init
+  command: ${OTC_PROVIDER} command
+  create: ${OTC_PROVIDER} create
+  delete: ${OTC_PROVIDER} delete
+  start: ${OTC_PROVIDER} start
+  stop: ${OTC_PROVIDER} stop
+  status: ${OTC_PROVIDER} status
