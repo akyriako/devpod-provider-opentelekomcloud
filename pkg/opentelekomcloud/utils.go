@@ -403,9 +403,9 @@ func (o *OpenTelekomCloudProvider) createDnatRule(serverId string) (string, erro
 	}
 
 	internalServicePort := options.DefaultSshPort
-	externalServicePort := random.InRange(dnatRuleMinOutsidePort, dnatRuleMaxOutsidePort)
+	var externalServicePort int
 
-	for o.isPortAlreadyUsedInDnatRule(dnatRules, externalServicePort) {
+	for externalServicePort == 0 || o.isPortAlreadyUsedInDnatRules(dnatRules, externalServicePort) {
 		externalServicePort = random.InRange(dnatRuleMinOutsidePort, dnatRuleMaxOutsidePort)
 	}
 
@@ -446,7 +446,7 @@ func (o *OpenTelekomCloudProvider) getDnatRules(natGatewayId string) ([]dnatrule
 	return dnatRules, nil
 }
 
-func (o *OpenTelekomCloudProvider) isPortAlreadyUsedInDnatRule(dnatRules []dnatrules.DnatRule, port int) bool {
+func (o *OpenTelekomCloudProvider) isPortAlreadyUsedInDnatRules(dnatRules []dnatrules.DnatRule, port int) bool {
 	for _, dnatRule := range dnatRules {
 		if dnatRule.ExternalServicePort == port {
 			return true
