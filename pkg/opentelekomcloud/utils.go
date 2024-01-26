@@ -23,6 +23,7 @@ const (
 	devpodTagKey           = "devpod"
 	devpodKeyPairName      = "KeyPair-DevPod"
 	dnatRuleIdTagKey       = "dnat"
+	floatingIpIdTagKey     = "fip"
 	dnatRuleMinOutsidePort = 10000
 	dnatRuleMaxOutsidePort = 19999
 )
@@ -72,14 +73,14 @@ func (o *OpenTelekomCloudProvider) startServer(serverId string) {
 }
 
 func (o *OpenTelekomCloudProvider) deleteServer(server *servers.Server) error {
+	resourceTags, err := tags.Get(o.ecsv1ServiceClient, "cloudservers", server.ID).Extract()
+	if err != nil {
+		return err
+	}
+	rts := resourceTags[:]
+
 	if o.Config.UseNatGateway() {
 		var dnatRuleId string
-		resourceTags, err := tags.Get(o.ecsv1ServiceClient, "cloudservers", server.ID).Extract()
-		if err != nil {
-			return err
-		}
-
-		rts := resourceTags[:]
 		for _, tag := range rts {
 			if tag.Key == dnatRuleIdTagKey {
 				dnatRuleId = tag.Value
@@ -88,6 +89,19 @@ func (o *OpenTelekomCloudProvider) deleteServer(server *servers.Server) error {
 		}
 
 		err = o.deleteDnatRule(dnatRuleId)
+		if err != nil {
+			return err
+		}
+	} else {
+		var floatingIpId string
+		for _, tag := range rts {
+			if tag.Key == floatingIpIdTagKey {
+				floatingIpId = tag.Value
+				break
+			}
+		}
+
+		err = o.deleteElasticIpAddress(floatingIpId)
 		if err != nil {
 			return err
 		}
@@ -208,6 +222,11 @@ func (o *OpenTelekomCloudProvider) createServer() (*servers.Server, error) {
 		tagList = append(tagList, tags.ResourceTag{
 			Key:   dnatRuleIdTagKey,
 			Value: dnatRuleId,
+		})
+	} else {
+		tagList = append(tagList, tags.ResourceTag{
+			Key:   floatingIpIdTagKey,
+			Value: fip.ID,
 		})
 	}
 
