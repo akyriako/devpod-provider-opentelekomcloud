@@ -289,6 +289,10 @@ func (o *OpenTelekomCloudProvider) getExternalIpAndPort(server servers.Server) (
 		}
 	}
 
+	if o.Config.Port == 0 {
+		o.Config.Port = options.DefaultSshPort
+	}
+
 	if o.Config.PublicIp == "" {
 		return "", -1, fmt.Errorf("no public ip was found for: %s", server.Name)
 	}
@@ -297,7 +301,8 @@ func (o *OpenTelekomCloudProvider) getExternalIpAndPort(server servers.Server) (
 }
 
 func (o *OpenTelekomCloudProvider) getServerIpAddresses(server servers.Server) (string, string) {
-	for _, v1 := range server.Addresses {
+	for portId, v1 := range server.Addresses {
+		o.Config.ServerPortId = portId
 		addresses := v1.([]interface{})
 		for _, v2 := range addresses {
 			address := v2.(map[string]interface{})
@@ -327,7 +332,7 @@ func (o *OpenTelekomCloudProvider) createDnatRule() (string, error) {
 
 	createOpts := dnatrules.CreateOpts{
 		NatGatewayID: o.Config.NatGatewayId,
-		PortID:       "04380d02-c0da-4ce9-af98-0177e665552a",
+		PortID:       o.Config.ServerPortId,
 		//PrivateIp:           o.Config.PrivateIp,
 		InternalServicePort: &internalServicePort,
 		FloatingIpID:        o.Config.FloatingIpId,

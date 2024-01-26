@@ -38,9 +38,10 @@ type Options struct {
 	NatGatewayId    string
 	FloatingIpId    string
 
-	PublicIp  string
-	PrivateIp string
-	Port      int
+	ServerPortId string
+	PublicIp     string
+	PrivateIp    string
+	Port         int
 
 	Region string
 	Tenant string
