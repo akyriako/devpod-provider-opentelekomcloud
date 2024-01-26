@@ -25,6 +25,8 @@ type OpenTelekomCloudProvider struct {
 
 	ecsv1ServiceClient *golangsdk.ServiceClient
 	ecsv2ServiceClient *golangsdk.ServiceClient
+	natv2ServiceClient *golangsdk.ServiceClient
+	netv2ServiceClient *golangsdk.ServiceClient
 
 	Log log.Logger
 
@@ -97,10 +99,28 @@ func NewProvider(log log.Logger, init bool) (*OpenTelekomCloudProvider, error) {
 
 	openTelekomCloudProvider.ecsv2ServiceClient = ecsv2sc
 
+	natv2sc, err := openstack.NewNatV2(openTelekomCloudProvider.Client, golangsdk.EndpointOpts{
+		Region: openTelekomCloudProvider.Config.Region,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to acquire a NewNatV2 service client: %s", err.Error())
+	}
+
+	openTelekomCloudProvider.natv2ServiceClient = natv2sc
+
+	netv2sc, err := openstack.NewNetworkV2(openTelekomCloudProvider.Client, golangsdk.EndpointOpts{
+		Region: openTelekomCloudProvider.Config.Region,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to acquire a NewNetworkV2 service client: %s", err.Error())
+	}
+
+	openTelekomCloudProvider.netv2ServiceClient = netv2sc
+
 	return openTelekomCloudProvider, nil
 }
 
-func (o *OpenTelekomCloudProvider) GetDevpodRunningInstance() (*servers.Server, error) {
+func (o *OpenTelekomCloudProvider) GetDevPodRunningInstance() (*servers.Server, error) {
 	server, err := o.getServer(o.Config.MachineID)
 	if err != nil {
 		return nil, err
@@ -109,22 +129,29 @@ func (o *OpenTelekomCloudProvider) GetDevpodRunningInstance() (*servers.Server, 
 	return server, nil
 }
 
-func (o *OpenTelekomCloudProvider) GetDevpodRunningInstanceElasticIp(server *servers.Server) (string, error) {
+func (o *OpenTelekomCloudProvider) GetDevPodRunningInstanceConnectionAddr(server *servers.Server) (string, int, error) {
 	if server == nil {
-		dpi, err := o.GetDevpodRunningInstance()
+		dpi, err := o.GetDevPodRunningInstance()
 		if err != nil {
-			return "", err
+			return "", -1, err
 		}
 
 		server = dpi
 	}
 
-	return o.extractElasticIpAddress(*server)
+	return o.getExternalIpAndPort(*server)
 }
 
 func (o *OpenTelekomCloudProvider) Create() error {
-	_, err := o.createServer()
+	server, err := o.createServer()
 	if err != nil {
+		if server != nil {
+			derr := o.deleteServer(server)
+			if derr != nil {
+				return errors.Wrap(err, fmt.Sprintf("provisioning failed, cleaning up the resources failed. please remove manually instance: %s", server.ID))
+			}
+		}
+
 		return err
 	}
 
@@ -132,16 +159,16 @@ func (o *OpenTelekomCloudProvider) Create() error {
 }
 
 func (o *OpenTelekomCloudProvider) Delete() error {
-	server, err := o.GetDevpodRunningInstance()
+	server, err := o.GetDevPodRunningInstance()
 	if err != nil {
 		return err
 	}
 
-	return o.deleteServer(server.ID)
+	return o.deleteServer(server)
 }
 
 func (o *OpenTelekomCloudProvider) Start() error {
-	server, err := o.GetDevpodRunningInstance()
+	server, err := o.GetDevPodRunningInstance()
 	if err != nil {
 		return err
 	}
@@ -154,7 +181,7 @@ func (o *OpenTelekomCloudProvider) Start() error {
 }
 
 func (o *OpenTelekomCloudProvider) Status() (client.Status, error) {
-	devPodInstance, err := o.GetDevpodRunningInstance()
+	devPodInstance, err := o.GetDevPodRunningInstance()
 	if err != nil {
 		return client.StatusNotFound, nil
 	}
@@ -171,7 +198,7 @@ func (o *OpenTelekomCloudProvider) Status() (client.Status, error) {
 }
 
 func (o *OpenTelekomCloudProvider) Stop() error {
-	server, err := o.GetDevpodRunningInstance()
+	server, err := o.GetDevPodRunningInstance()
 	if err != nil {
 		return err
 	}

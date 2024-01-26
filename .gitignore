@@ -2,3 +2,4 @@
 env
 devpod-provider-opentelekomcloud
 release
+.run

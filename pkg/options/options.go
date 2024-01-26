@@ -5,18 +5,28 @@ import (
 	"github.com/sethvargo/go-password/password"
 	"os"
 	"strconv"
+	"strings"
 )
 
 var (
-	OTC_TENANT_NAME      = "OTC_TENANT_NAME"
-	OTC_REGION           = "OTC_REGION"
+	OTC_TENANT_NAME = "OTC_TENANT_NAME"
+	OTC_REGION      = "OTC_REGION"
+
 	OTC_NETWORK_ID       = "OTC_NETWORK_ID"
+	OTC_NATGATEWAY_ID    = "OTC_NATGATEWAY_ID"
+	OTC_FLOATINGIP_ID    = "OTC_FLOATINGIP_ID"
 	OTC_SECURITYGROUP_ID = "OTC_SECURITYGROUP_ID"
-	OTC_FLAVOR_ID        = "OTC_FLAVOR_ID"
-	OTC_DISK_IMAGE       = "OTC_DISK_IMAGE"
-	OTC_DISK_SIZE        = "OTC_DISK_SIZE"
-	MACHINE_ID           = "MACHINE_ID"
-	MACHINE_FOLDER       = "MACHINE_FOLDER"
+
+	OTC_FLAVOR_ID  = "OTC_FLAVOR_ID"
+	OTC_DISK_IMAGE = "OTC_DISK_IMAGE"
+	OTC_DISK_SIZE  = "OTC_DISK_SIZE"
+
+	MACHINE_ID     = "MACHINE_ID"
+	MACHINE_FOLDER = "MACHINE_FOLDER"
+)
+
+const (
+	DefaultSshPort int = 22
 )
 
 type Options struct {
@@ -25,12 +35,23 @@ type Options struct {
 	DiskSizeGB      int
 	SubnetId        string
 	SecurityGroupId string
+	NatGatewayId    string
+	FloatingIpId    string
+
+	ServerPortId string
+	PublicIp     string
+	PrivateIp    string
+	Port         int
 
 	Region string
 	Tenant string
 
 	MachineID     string
 	MachineFolder string
+}
+
+func (o *Options) UseNatGateway() bool {
+	return strings.TrimSpace(o.NatGatewayId) != ""
 }
 
 func FromEnv(init bool) (*Options, error) {
@@ -53,6 +74,17 @@ func FromEnv(init bool) (*Options, error) {
 		return nil, err
 	}
 
+	// TODO: add eip option, not mandatory, except for nat scenario.
+	retOptions.NatGatewayId = os.Getenv(OTC_NATGATEWAY_ID)
+	if !retOptions.UseNatGateway() {
+		retOptions.Port = DefaultSshPort
+	} else {
+		retOptions.FloatingIpId, err = fromEnvOrError(OTC_FLOATINGIP_ID)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	retOptions.SecurityGroupId, err = fromEnvOrError(OTC_SECURITYGROUP_ID)
 	if err != nil {
 		return nil, err
@@ -72,7 +104,6 @@ func FromEnv(init bool) (*Options, error) {
 	if err != nil {
 		return nil, err
 	}
-	//retOptions.Domain = os.Getenv(OTC_DOMAIN_NAME)
 
 	retOptions.Tenant, err = fromEnvOrError(OTC_TENANT_NAME)
 	if err != nil {
@@ -85,10 +116,6 @@ func FromEnv(init bool) (*Options, error) {
 	}
 
 	retOptions.MachineID = os.Getenv(MACHINE_ID)
-	//if err != nil {
-	//	return nil, err
-	//}
-
 	if retOptions.MachineID == "" {
 		// create a MACHINE_ID
 		postfix, err := password.Generate(4, 2, 0, true, true)
