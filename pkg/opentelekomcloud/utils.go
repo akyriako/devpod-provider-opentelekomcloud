@@ -71,8 +71,29 @@ func (o *OpenTelekomCloudProvider) startServer(serverId string) {
 	startstop.Start(o.ecsv2ServiceClient, serverId)
 }
 
-func (o *OpenTelekomCloudProvider) deleteServer(serverId string) error {
-	return servers.Delete(o.ecsv2ServiceClient, serverId).ExtractErr()
+func (o *OpenTelekomCloudProvider) deleteServer(server *servers.Server) error {
+	if o.Config.UseNatGateway() {
+		var dnatRuleId string
+		resourceTags, err := tags.Get(o.ecsv1ServiceClient, "cloudservers", server.ID).Extract()
+		if err != nil {
+			return err
+		}
+
+		rts := resourceTags[:]
+		for _, tag := range rts {
+			if tag.Key == dnatRuleIdTagKey {
+				dnatRuleId = tag.Value
+				break
+			}
+		}
+
+		err = o.deleteDnatRule(dnatRuleId)
+		if err != nil {
+			return err
+		}
+	}
+
+	return servers.Delete(o.ecsv2ServiceClient, server.ID).ExtractErr()
 }
 
 func (o *OpenTelekomCloudProvider) stopServer(serverId string) {

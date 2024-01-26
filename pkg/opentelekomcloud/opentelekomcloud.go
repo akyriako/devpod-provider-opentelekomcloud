@@ -157,7 +157,7 @@ func (o *OpenTelekomCloudProvider) Delete() error {
 		return err
 	}
 
-	return o.deleteServer(server.ID)
+	return o.deleteServer(server)
 }
 
 func (o *OpenTelekomCloudProvider) Start() error {
