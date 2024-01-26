@@ -143,8 +143,15 @@ func (o *OpenTelekomCloudProvider) GetDevPodRunningInstanceConnectionAddr(server
 }
 
 func (o *OpenTelekomCloudProvider) Create() error {
-	_, err := o.createServer()
+	server, err := o.createServer()
 	if err != nil {
+		if server != nil {
+			derr := o.deleteServer(server)
+			if derr != nil {
+				return errors.Wrap(err, fmt.Sprintf("provisioning failed, cleaning up the resources failed. please remove manually instance: %s", server.ID))
+			}
+		}
+
 		return err
 	}
 

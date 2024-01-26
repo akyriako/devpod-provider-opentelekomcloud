@@ -186,19 +186,20 @@ func (o *OpenTelekomCloudProvider) createServer() (*servers.Server, error) {
 
 	o.getServerIpAddresses(*server)
 
+	// from here on return the instance create so it can be deleted in case of error
+
 	if !o.Config.UseNatGateway() {
 		// TODO: figure out why EIP is created with default bandwidth 1000Mbits/sec
-		// TODO: figure out why EIP is not automatically deleted when instance is deleted
 		// associate the server with the floating ip
 		err = o.assosiateElasticIpAddress(server.ID, fip)
 		if err != nil {
-			return nil, err
+			return server, err
 		}
 	} else {
 		// create a DNAT Rule in the designated NAT Gateway
 		dnatRuleId, err = o.createDnatRule(server.ID)
 		if err != nil {
-			return nil, err
+			return server, err
 		}
 	}
 
@@ -206,7 +207,7 @@ func (o *OpenTelekomCloudProvider) createServer() (*servers.Server, error) {
 	// add an *existing* security group (allow 22, and preferrably ICMP as well)
 	err = o.addSecurityGroup(server.ID)
 	if err != nil {
-		return nil, err
+		return server, err
 	}
 
 	// TODO: create a separate method to get the necessary resource tags
@@ -231,7 +232,7 @@ func (o *OpenTelekomCloudProvider) createServer() (*servers.Server, error) {
 	}
 
 	if err := tags.Create(o.ecsv1ServiceClient, "cloudservers", server.ID, tagList).ExtractErr(); err != nil {
-		return nil, err
+		return server, err
 	}
 
 	return server, nil
