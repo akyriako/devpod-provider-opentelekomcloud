@@ -134,7 +134,6 @@ func (o *OpenTelekomCloudProvider) createServer() (*servers.Server, error) {
 		return nil, err
 	}
 
-	// TODO: get ImageUUID by ImageRefName - at the moment suggested values are not working
 	// define the details of the block device that will boot the server
 	blockDevices := []bootfromvolume.BlockDevice{
 		bootfromvolume.BlockDevice{
