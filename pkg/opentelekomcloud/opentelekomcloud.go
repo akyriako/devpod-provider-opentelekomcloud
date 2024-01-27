@@ -27,6 +27,7 @@ type OpenTelekomCloudProvider struct {
 	ecsv2ServiceClient *golangsdk.ServiceClient
 	natv2ServiceClient *golangsdk.ServiceClient
 	netv2ServiceClient *golangsdk.ServiceClient
+	imsv2ServiceClient *golangsdk.ServiceClient
 
 	Log log.Logger
 
@@ -116,6 +117,15 @@ func NewProvider(log log.Logger, init bool) (*OpenTelekomCloudProvider, error) {
 	}
 
 	openTelekomCloudProvider.netv2ServiceClient = netv2sc
+
+	imsv2sc, err := openstack.NewIMSV2(openTelekomCloudProvider.Client, golangsdk.EndpointOpts{
+		Region: openTelekomCloudProvider.Config.Region,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to acquire a NewIMSV2 service client: %s", err.Error())
+	}
+
+	openTelekomCloudProvider.imsv2ServiceClient = imsv2sc
 
 	return openTelekomCloudProvider, nil
 }

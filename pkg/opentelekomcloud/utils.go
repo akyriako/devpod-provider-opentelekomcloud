@@ -13,6 +13,7 @@ import (
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/extensions/secgroups"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/extensions/startstop"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/servers"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/ims/v2/images"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/dnatrules"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/portsecurity"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/ports"
@@ -143,6 +144,11 @@ func (o *OpenTelekomCloudProvider) createServer() (*servers.Server, error) {
 		}
 	}
 
+	imageId, err := o.getImageId(o.Config.DiskImage)
+	if err != nil {
+		return nil, err
+	}
+
 	// TODO: get ImageUUID by ImageRefName - at the moment suggested values are not working
 	// define the details of the block device that will boot the server
 	blockDevices := []bootfromvolume.BlockDevice{
@@ -150,7 +156,7 @@ func (o *OpenTelekomCloudProvider) createServer() (*servers.Server, error) {
 			DeleteOnTermination: true,
 			DestinationType:     bootfromvolume.DestinationVolume,
 			SourceType:          bootfromvolume.SourceImage,
-			UUID:                o.Config.DiskImage,
+			UUID:                imageId,
 			VolumeSize:          o.Config.DiskSizeGB,
 		},
 	}
@@ -204,7 +210,7 @@ func (o *OpenTelekomCloudProvider) createServer() (*servers.Server, error) {
 	}
 
 	// TODO: create a security group if it the env variable is empty
-	// add an *existing* security group (allow 22, and preferrably ICMP as well)
+	// add an *existing* security group (allow 22, and preferably ICMP as well)
 	err = o.addSecurityGroup(server.ID)
 	if err != nil {
 		return server, err
@@ -379,6 +385,23 @@ func (o *OpenTelekomCloudProvider) getServerPortId(serverId string) (string, err
 	}
 
 	return allPorts[0].ID, nil
+}
+
+func (o *OpenTelekomCloudProvider) getImageId(imageName string) (string, error) {
+	imagesInfo, err := images.ListImages(o.imsv2ServiceClient, images.ListImagesOpts{
+		Name: imageName,
+	})
+	if err != nil {
+		return "", err
+	}
+
+	for _, imageInfo := range imagesInfo {
+		if imageInfo.Name == imageName {
+			return imageInfo.Id, nil
+		}
+	}
+
+	return "", nil
 }
 
 func (o *OpenTelekomCloudProvider) getDnatRuleElasticIpAddress(dnatRuleId string) (string, int, error) {
