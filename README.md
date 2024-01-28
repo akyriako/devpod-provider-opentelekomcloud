@@ -2,6 +2,8 @@
 
 The Open Telekom Cloud provider for [Loft Labs' DevPod](https://github.com/loft-sh/devpod).
 
+_That is a community project, not an officially supported one by T-Systems International GmbH._
+
 ## Overview
 
 Open Telekom Cloud is an **OpenStack-based** public cloud offering from German leading IT services provider 
