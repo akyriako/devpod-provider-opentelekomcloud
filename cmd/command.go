@@ -72,10 +72,24 @@ func (cmd *CommandCmd) Run(
 		return err
 	}
 
+	var sshClient *ssh.Client
 	addr := fmt.Sprintf("%s:%d", publicIp, port)
-	sshClient, err := NewSSHClient("devpod", addr, privateKey)
-	if err != nil {
-		return errors.Wrap(err, "create ssh client")
+
+	if opentelekomcloudProvider.Config.UseProxy() {
+		proxyAddr := fmt.Sprintf(
+			"%s:%d",
+			opentelekomcloudProvider.Config.ProxyAddress,
+			*opentelekomcloudProvider.Config.ProxyPort,
+		)
+		sshClient, err = NewSSHClient("devpod", addr, privateKey, proxyAddr)
+		if err != nil {
+			return errors.Wrap(err, "create ssh client")
+		}
+	} else {
+		sshClient, err = devpodssh.NewSSHClient("devpod", addr, privateKey)
+		if err != nil {
+			return errors.Wrap(err, "create ssh client")
+		}
 	}
 
 	defer sshClient.Close()
@@ -84,7 +98,7 @@ func (cmd *CommandCmd) Run(
 	return devpodssh.Run(ctx, sshClient, command, os.Stdin, os.Stdout, os.Stderr)
 }
 
-func NewSSHClient(user, addr string, keyBytes []byte) (*ssh.Client, error) {
+func NewSSHClient(user, addr string, keyBytes []byte, proxyAddr string) (*ssh.Client, error) {
 	sshConfig, err := devpodssh.ConfigFromKeyBytes(keyBytes)
 	if err != nil {
 		return nil, err
@@ -94,7 +108,7 @@ func NewSSHClient(user, addr string, keyBytes []byte) (*ssh.Client, error) {
 		sshConfig.User = user
 	}
 
-	dialer, err := proxy.SOCKS5("tcp", "determined_mestorf.orb.local:1080", nil, proxy.Direct)
+	dialer, err := proxy.SOCKS5("tcp", proxyAddr, nil, proxy.Direct)
 	if err != nil {
 		return nil, fmt.Errorf("connect to proxy %v failed: %w", addr, err)
 	}

@@ -21,6 +21,9 @@ var (
 	OTC_DISK_IMAGE = "OTC_DISK_IMAGE"
 	OTC_DISK_SIZE  = "OTC_DISK_SIZE"
 
+	PROXY_ADDRESS = "PROXY_ADDRESS"
+	PROXY_PORT    = "PROXY_PORT"
+
 	MACHINE_ID     = "MACHINE_ID"
 	MACHINE_FOLDER = "MACHINE_FOLDER"
 )
@@ -46,12 +49,19 @@ type Options struct {
 	Region string
 	Tenant string
 
+	ProxyAddress string
+	ProxyPort    *int
+
 	MachineID     string
 	MachineFolder string
 }
 
 func (o *Options) UseNatGateway() bool {
 	return strings.TrimSpace(o.NatGatewayId) != ""
+}
+
+func (o *Options) UseProxy() bool {
+	return strings.TrimSpace(o.ProxyAddress) != "" && o.ProxyPort != nil
 }
 
 func FromEnv(init bool) (*Options, error) {
@@ -83,6 +93,13 @@ func FromEnv(init bool) (*Options, error) {
 			return nil, err
 		}
 	}
+
+	retOptions.ProxyAddress = os.Getenv(PROXY_ADDRESS)
+	proxyPort, err := strconv.Atoi(os.Getenv(PROXY_PORT))
+	if err != nil {
+		return nil, err
+	}
+	retOptions.ProxyPort = &proxyPort
 
 	retOptions.SecurityGroupId, err = fromEnvOrError(OTC_SECURITYGROUP_ID)
 	if err != nil {

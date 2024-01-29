@@ -26,7 +26,18 @@ optionGroups:
       - INJECT_DOCKER_CREDENTIALS
       - INJECT_GIT_CREDENTIALS
     name: "Agent Options"
+  - options:
+      - PROXY_ADDRESS
+      - PROXY_PORT
+    name: "Proxy Options"
 options:
+  PROXY_ADDRESS:
+    description: Proxy address, without http(s)
+
+  PROXY_PORT:
+    description: Proxy port
+    default: 1080
+
   OTC_ACCESS_KEY:
     description: The Open Telekom Cloud Access Key
     required: true
