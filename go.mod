@@ -10,6 +10,7 @@ require (
 	github.com/sethvargo/go-password v0.2.0
 	github.com/spf13/cobra v1.8.0
 	golang.org/x/crypto v0.18.0
+	golang.org/x/net v0.10.0
 )
 
 replace github.com/opentelekomcloud/gophertelekomcloud => github.com/opentelekomcloud/gophertelekomcloud v0.8.1-0.20240126162612-0fb6b10e8415

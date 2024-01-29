@@ -1,5 +1,5 @@
 name: opentelekomcloud
-version: v0.0.2-beta-debug
+version: v0.0.3-beta
 description: |-
   DevPod on OpenTelekomCloud
 icon: https://avatars.githubusercontent.com/u/19344672?s=200&v=4
@@ -26,7 +26,18 @@ optionGroups:
       - INJECT_DOCKER_CREDENTIALS
       - INJECT_GIT_CREDENTIALS
     name: "Agent Options"
+  - options:
+      - PROXY_ADDRESS
+      - PROXY_PORT
+    name: "Proxy Options"
 options:
+  PROXY_ADDRESS:
+    description: Proxy address, without http(s)
+
+  PROXY_PORT:
+    description: Proxy port
+    default: 1080
+
   OTC_ACCESS_KEY:
     description: The Open Telekom Cloud Access Key
     required: true
@@ -116,16 +127,16 @@ agent:
   inactivityTimeout: ${INACTIVITY_TIMEOUT}
   injectGitCredentials: ${INJECT_GIT_CREDENTIALS}
   injectDockerCredentials: ${INJECT_DOCKER_CREDENTIALS}
-  binaries:
-    OTC_PROVIDER:
-      - os: linux
-        arch: amd64
-        path: https://github.com/akyriako/devpod-provider-opentelekomcloud/releases/download/v0.0.2-beta-debug/devpod-provider-opentelekomcloud-linux-amd64
-        checksum: ##CHECKSUM_LINUX_AMD64##
-      - os: linux
-        arch: arm64
-        path: https://github.com/akyriako/devpod-provider-opentelekomcloud/releases/download/v0.0.2-beta-debug/devpod-provider-opentelekomcloud-linux-arm64
-        checksum: ##CHECKSUM_LINUX_ARM64##
+#  binaries:
+#    OTC_PROVIDER:
+#      - os: linux
+#        arch: amd64
+#        path: https://github.com/akyriako/devpod-provider-opentelekomcloud/releases/download/v0.0.3-beta/devpod-provider-opentelekomcloud-linux-amd64
+#        checksum: ##CHECKSUM_LINUX_AMD64##
+#      - os: linux
+#        arch: arm64
+#        path: https://github.com/akyriako/devpod-provider-opentelekomcloud/releases/download/v0.0.3-beta/devpod-provider-opentelekomcloud-linux-arm64
+#        checksum: ##CHECKSUM_LINUX_ARM64##
   exec:
     shutdown: |-
       ${OTC_PROVIDER} stop
@@ -133,23 +144,23 @@ agent:
 #  OTC_PROVIDER:
 #    - os: linux
 #      arch: amd64
-#      path: https://github.com/akyriako/devpod-provider-opentelekomcloud/releases/download/v0.0.2-beta-debug/devpod-provider-opentelekomcloud-linux-amd64
+#      path: https://github.com/akyriako/devpod-provider-opentelekomcloud/releases/download/v0.0.3-beta/devpod-provider-opentelekomcloud-linux-amd64
 #      checksum: ##CHECKSUM_LINUX_AMD64##
 #    - os: linux
 #      arch: arm64
-#      path: https://github.com/akyriako/devpod-provider-opentelekomcloud/releases/download/v0.0.2-beta-debug/devpod-provider-opentelekomcloud-linux-arm64
+#      path: https://github.com/akyriako/devpod-provider-opentelekomcloud/releases/download/v0.0.3-beta/devpod-provider-opentelekomcloud-linux-arm64
 #      checksum: ##CHECKSUM_LINUX_ARM64##
 #    - os: darwin
 #      arch: amd64
-#      path: https://github.com/akyriako/devpod-provider-opentelekomcloud/releases/download/v0.0.2-beta-debug/devpod-provider-opentelekomcloud-darwin-amd64
+#      path: https://github.com/akyriako/devpod-provider-opentelekomcloud/releases/download/v0.0.3-beta/devpod-provider-opentelekomcloud-darwin-amd64
 #      checksum: ##CHECKSUM_DARWIN_AMD64##
 #    - os: darwin
 #      arch: arm64
-#      path: https://github.com/akyriako/devpod-provider-opentelekomcloud/releases/download/v0.0.2-beta-debug/devpod-provider-opentelekomcloud-darwin-arm64
+#      path: https://github.com/akyriako/devpod-provider-opentelekomcloud/releases/download/v0.0.3-beta/devpod-provider-opentelekomcloud-darwin-arm64
 #      checksum: ##CHECKSUM_DARWIN_ARM64##
 #    - os: windows
 #      arch: amd64
-#      path: https://github.com/akyriako/devpod-provider-opentelekomcloud/releases/download/v0.0.2-beta-debug/devpod-provider-opentelekomcloud-windows-amd64.exe
+#      path: https://github.com/akyriako/devpod-provider-opentelekomcloud/releases/download/v0.0.3-beta/devpod-provider-opentelekomcloud-windows-amd64.exe
 #      checksum: ##CHECKSUM_WINDOWS_AMD64##
 exec:
   init: ${OTC_PROVIDER} init
