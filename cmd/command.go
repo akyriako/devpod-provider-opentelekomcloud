@@ -78,8 +78,8 @@ func (cmd *CommandCmd) Run(
 	if opentelekomcloudProvider.Config.UseProxy() {
 		proxyAddr := fmt.Sprintf(
 			"%s:%d",
-			opentelekomcloudProvider.Config.ProxyAddress,
-			*opentelekomcloudProvider.Config.ProxyPort,
+			opentelekomcloudProvider.Config.ProxyHost,
+			*opentelekomcloudProvider.Config.SocksPort,
 		)
 		sshClient, err = NewSSHClient("devpod", addr, privateKey, proxyAddr)
 		if err != nil {

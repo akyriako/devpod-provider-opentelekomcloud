@@ -27,15 +27,15 @@ optionGroups:
       - INJECT_GIT_CREDENTIALS
     name: "Agent Options"
   - options:
-      - PROXY_ADDRESS
-      - PROXY_PORT
+      - PROXY_HOST
+      - SOCKS_PORT
     name: "Proxy Options"
 options:
-  PROXY_ADDRESS:
-    description: Proxy address, without http(s)
+  PROXY_HOST:
+    description: Proxy host, without http(s)
 
-  PROXY_PORT:
-    description: Proxy port
+  SOCKS_PORT:
+    description: SOCKSv5 port
     default: 1080
 
   OTC_ACCESS_KEY:

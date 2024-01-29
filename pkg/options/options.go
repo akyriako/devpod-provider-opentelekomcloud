@@ -21,8 +21,8 @@ var (
 	OTC_DISK_IMAGE = "OTC_DISK_IMAGE"
 	OTC_DISK_SIZE  = "OTC_DISK_SIZE"
 
-	PROXY_ADDRESS = "PROXY_ADDRESS"
-	PROXY_PORT    = "PROXY_PORT"
+	PROXY_HOST = "PROXY_HOST"
+	SOCKS_PORT = "SOCKS_PORT"
 
 	MACHINE_ID     = "MACHINE_ID"
 	MACHINE_FOLDER = "MACHINE_FOLDER"
@@ -49,8 +49,8 @@ type Options struct {
 	Region string
 	Tenant string
 
-	ProxyAddress string
-	ProxyPort    *int
+	ProxyHost string
+	SocksPort *int
 
 	MachineID     string
 	MachineFolder string
@@ -61,7 +61,7 @@ func (o *Options) UseNatGateway() bool {
 }
 
 func (o *Options) UseProxy() bool {
-	return strings.TrimSpace(o.ProxyAddress) != "" && o.ProxyPort != nil
+	return strings.TrimSpace(o.ProxyHost) != "" && o.SocksPort != nil
 }
 
 func FromEnv(init bool) (*Options, error) {
@@ -94,12 +94,12 @@ func FromEnv(init bool) (*Options, error) {
 		}
 	}
 
-	retOptions.ProxyAddress = os.Getenv(PROXY_ADDRESS)
-	proxyPort, err := strconv.Atoi(os.Getenv(PROXY_PORT))
+	retOptions.ProxyHost = os.Getenv(PROXY_HOST)
+	proxyPort, err := strconv.Atoi(os.Getenv(SOCKS_PORT))
 	if err != nil {
 		return nil, err
 	}
-	retOptions.ProxyPort = &proxyPort
+	retOptions.SocksPort = &proxyPort
 
 	retOptions.SecurityGroupId, err = fromEnvOrError(OTC_SECURITYGROUP_ID)
 	if err != nil {
