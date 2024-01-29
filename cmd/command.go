@@ -7,10 +7,12 @@ import (
 	"os"
 
 	"github.com/loft-sh/devpod/pkg/provider"
-	"github.com/loft-sh/devpod/pkg/ssh"
+	devpodssh "github.com/loft-sh/devpod/pkg/ssh"
 	"github.com/loft-sh/log"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
+	"golang.org/x/crypto/ssh"
+	"golang.org/x/net/proxy"
 )
 
 // CommandCmd holds the cmd flags
@@ -53,7 +55,7 @@ func (cmd *CommandCmd) Run(
 		return fmt.Errorf("command environment variable is missing")
 	}
 
-	privateKey, err := ssh.GetPrivateKeyRawBase(opentelekomcloudProvider.Config.MachineFolder)
+	privateKey, err := devpodssh.GetPrivateKeyRawBase(opentelekomcloudProvider.Config.MachineFolder)
 	if err != nil {
 		return fmt.Errorf("load private key: %w", err)
 	}
@@ -71,7 +73,7 @@ func (cmd *CommandCmd) Run(
 	}
 
 	addr := fmt.Sprintf("%s:%d", publicIp, port)
-	sshClient, err := ssh.NewSSHClient("devpod", addr, privateKey)
+	sshClient, err := NewSSHClient("devpod", addr, privateKey)
 	if err != nil {
 		return errors.Wrap(err, "create ssh client")
 	}
@@ -79,5 +81,38 @@ func (cmd *CommandCmd) Run(
 	defer sshClient.Close()
 
 	// run command
-	return ssh.Run(ctx, sshClient, command, os.Stdin, os.Stdout, os.Stderr)
+	return devpodssh.Run(ctx, sshClient, command, os.Stdin, os.Stdout, os.Stderr)
+}
+
+func NewSSHClient(user, addr string, keyBytes []byte) (*ssh.Client, error) {
+	sshConfig, err := devpodssh.ConfigFromKeyBytes(keyBytes)
+	if err != nil {
+		return nil, err
+	}
+
+	if user != "" {
+		sshConfig.User = user
+	}
+
+	dialer, err := proxy.SOCKS5("tcp", "determined_mestorf.orb.local:1080", nil, proxy.Direct)
+	if err != nil {
+		return nil, fmt.Errorf("connect to proxy %v failed: %w", addr, err)
+	}
+
+	netConn, err := dialer.Dial("tcp", addr)
+	if err != nil {
+		return nil, err
+	}
+
+	sshConn, channel, request, err := ssh.NewClientConn(netConn, addr, sshConfig)
+	if err != nil {
+		return nil, err
+	}
+
+	client := ssh.NewClient(sshConn, channel, request)
+	if err != nil {
+		return nil, fmt.Errorf("dial to %v failed: %w", addr, err)
+	}
+
+	return client, nil
 }
