@@ -121,6 +121,7 @@ func (o *OpenTelekomCloudProvider) createServer() (*servers.Server, error) {
 	var fip *floatingips.FloatingIP
 	var dnatRuleId string
 
+	// create a new elastic ip if a gateway is not used
 	if !o.Config.UseNatGateway() {
 		// create a floating ip
 		fip, err = o.createElasticIpAddress()
@@ -129,6 +130,7 @@ func (o *OpenTelekomCloudProvider) createServer() (*servers.Server, error) {
 		}
 	}
 
+	// get image id from image name
 	imageId, err := o.getImageId(o.Config.DiskImage)
 	if err != nil {
 		return nil, err
@@ -168,7 +170,7 @@ func (o *OpenTelekomCloudProvider) createServer() (*servers.Server, error) {
 		return nil, err
 	}
 
-	// Wait until the server is in the "ACTIVE" state
+	// wait until the server is in the "ACTIVE" state
 	server, err = o.waitForServerActive(server.ID)
 	if err != nil {
 		return nil, err
@@ -176,7 +178,7 @@ func (o *OpenTelekomCloudProvider) createServer() (*servers.Server, error) {
 
 	o.getServerIpAddresses(*server)
 
-	// from here on return the instance create so it can be deleted in case of error
+	// from here on return the instance create, even in the event of error, so it can be deleted properly
 
 	if !o.Config.UseNatGateway() {
 		// TODO: figure out why EIP is created with default bandwidth 1000Mbits/sec
