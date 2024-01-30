@@ -62,6 +62,15 @@ func (o *OpenTelekomCloudProvider) deleteDnatRule(dnatRuleId string) error {
 	return nil
 }
 
+func (o *OpenTelekomCloudProvider) getDnatRule(dnatRuleId string) (*dnatrules.DnatRule, error) {
+	dnatrule, err := dnatrules.Get(o.natv2ServiceClient, dnatRuleId)
+	if err != nil {
+		return nil, err
+	}
+
+	return dnatrule, nil
+}
+
 func (o *OpenTelekomCloudProvider) getDnatRules(natGatewayId string) ([]dnatrules.DnatRule, error) {
 	dnatRules, err := dnatrules.List(o.natv2ServiceClient, dnatrules.ListOpts{
 		NatGatewayId: natGatewayId,
