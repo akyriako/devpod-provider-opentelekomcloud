@@ -59,7 +59,7 @@ You will need to provision to your tenant the following resources before being a
 
 ### Emulate a Proxy Server
 
-If you want to emulate a proxy server in your development environment create the following container
+If you want to emulate a proxy server in your development environment, create the following container
 and set its IP as the `PROXY_HOST` value:
 
 ```shell
