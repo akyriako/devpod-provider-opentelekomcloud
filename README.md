@@ -49,6 +49,8 @@ You will need to provision to your tenant the following resources before being a
 | OTC_SECURITYGROUP_ID | false    | Security Group ID to use with this VM             |                              |
 | OTC_NATGATEWAY_ID    | false    | NAT Gateway ID (to use instead of individual EIP) |                              |
 | OTC_FLOATINGIP_ID    | false    | EIP ID to associate with NAT Gateway DNAT Rules   |                              |
+| PROXY_HOST           | false    | SOCKS Host                                        |                              |
+| SOCKS_PORT           | false    | SOCKS v5 Port                                     | 1080                         |
 
 **Note**: If you intend to use a NAT Gateway you should have already created an EIP and insert its ID in `OTC_FLOATINGIP_ID`
           If not, the provider will take care creating and destroying the necessary EIP needed to access your VM.
