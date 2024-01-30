@@ -52,10 +52,12 @@ You will need to provision to your tenant the following resources before being a
 | PROXY_HOST           | false    | SOCKS Host                                        |                              |
 | SOCKS_PORT           | false    | SOCKS v5 Port                                     | 1080                         |
 
-**Note, NAT Gateway or EIP?**: If you intend to use a NAT Gateway you should have already created an EIP and insert its ID in `OTC_FLOATINGIP_ID`
+**NAT Gateway or EIP?**: If you intend to use a NAT Gateway you should have already created an EIP and insert its ID in `OTC_FLOATINGIP_ID`
           If not, the provider will take care creating and destroying the necessary EIP needed to access your VM.
 
-**Note, How can I emulate a proxy server?**: If you want to emulate a proxy server in your development environment create the following container
+### Development
+
+**How can I emulate a proxy server?**: If you want to emulate a proxy server in your development environment create the following container
           and set its IP as the `PROXY_HOST` value:
 
 ```shell
