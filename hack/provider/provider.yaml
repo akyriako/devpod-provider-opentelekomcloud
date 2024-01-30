@@ -62,26 +62,25 @@ options:
       - eu-ch
 
   OTC_NETWORK_ID:
-    description: The Open Telekom Cloud Subnet ID to place the VM into
+    description: The VPC Subnet ID to place the VM into
     required: true
 
   OTC_NATGATEWAY_ID:
-    description: The Open Telekom Cloud NAT Gateway ID to use instead of individual Elastic IPs
+    description: The NAT Gateway ID to use instead of individual Elastic IPs (if left empty, a new individual EIP will be created)
 
   OTC_FLOATINGIP_ID:
-    description: The Open Telekom Cloud NAT Elastic IP ID to associate with NAT Gateway DNAT Rules
+    description: The Elastic IP ID to associate with NAT Gateway DNAT Rules (fill it in only when you defined a NAT Gateway ID)
 
   OTC_SECURITYGROUP_ID:
-    description: The Open Telekom Cloud Security Group ID to use with this VM
-    required: true
+    description: The Security Group ID to use with this VM, opens port 22 (if left empty, a new one will be created)
 
   OTC_DISK_SIZE:
-    description: Virtual Machine's Disk Size (in GB)
+    description: The Disk Size (in GB) of the VM
     required: true
     default: "40"
 
   OTC_DISK_IMAGE:
-    description: Virtual Machine's Disk Image
+    description: The Disk Image of the VM
     default: Standard_Ubuntu_22.04_latest
     suggestions:
       - Standard_Ubuntu_22.04_latest
@@ -90,7 +89,7 @@ options:
       - Standard_Fedora_38_latest
 
   OTC_FLAVOR_ID:
-    description: The Open Telekom Cloud Flavor to use for sizing this VM
+    description: The Flavor to use for sizing this VM
     default: s3.large.2
     suggestions:
       - s3.medium.1

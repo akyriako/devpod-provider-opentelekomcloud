@@ -101,10 +101,7 @@ func FromEnv(init bool) (*Options, error) {
 	}
 	retOptions.SocksPort = &proxyPort
 
-	retOptions.SecurityGroupId, err = fromEnvOrError(OTC_SECURITYGROUP_ID)
-	if err != nil {
-		return nil, err
-	}
+	retOptions.SecurityGroupId = os.Getenv(OTC_SECURITYGROUP_ID)
 
 	diskSizeInGB, err := fromEnvOrError(OTC_DISK_SIZE)
 	if err != nil {

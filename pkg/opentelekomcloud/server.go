@@ -2,8 +2,10 @@ package opentelekomcloud
 
 import (
 	"encoding/base64"
+	"errors"
 	"fmt"
 	"github.com/loft-sh/devpod/pkg/ssh"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/common/tags"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/extensions/bootfromvolume"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/extensions/floatingips"
@@ -11,6 +13,7 @@ import (
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/extensions/startstop"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/servers"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/ims/v2/images"
+	"strings"
 	"time"
 )
 
@@ -75,7 +78,7 @@ func (o *OpenTelekomCloudProvider) deleteServer(server *servers.Server) error {
 		}
 
 		err = o.deleteDnatRule(dnatRuleId)
-		if err != nil {
+		if err != nil && !errors.As(err, &golangsdk.ErrDefault404{}) {
 			return err
 		}
 	} else {
@@ -88,7 +91,21 @@ func (o *OpenTelekomCloudProvider) deleteServer(server *servers.Server) error {
 		}
 
 		err = o.deleteElasticIpAddress(floatingIpId)
-		if err != nil {
+		if err != nil && !errors.As(err, &golangsdk.ErrDefault404{}) {
+			return err
+		}
+	}
+
+	securityGroupName := fmt.Sprintf("sg-%s-allow-ssh", server.Name)
+	securityGroup, err := o.getSecurityGroup(server.ID, securityGroupName)
+	if err == nil {
+		err = o.removeServerFromSecurityGroup(server.ID, securityGroup.ID)
+		if err != nil && !errors.As(err, &golangsdk.ErrDefault404{}) {
+			return err
+		}
+
+		err = o.deleteSecurityGroup(securityGroup.ID)
+		if err != nil && !errors.As(err, &golangsdk.ErrDefault404{}) {
 			return err
 		}
 	}
@@ -195,9 +212,18 @@ func (o *OpenTelekomCloudProvider) createServer() (*servers.Server, error) {
 		}
 	}
 
+	if strings.TrimSpace(o.Config.SecurityGroupId) == "" {
+		securityGroupId, err := o.createSecurityGroup()
+		if err != nil {
+			return server, err
+		}
+
+		o.Config.SecurityGroupId = securityGroupId
+	}
+
 	// TODO: create a security group if it the env variable is empty
 	// add an *existing* security group (allow 22, and preferably ICMP as well)
-	err = o.addSecurityGroup(server.ID)
+	err = o.addServerInSecurityGroup(server.ID, o.Config.SecurityGroupId)
 	if err != nil {
 		return server, err
 	}
