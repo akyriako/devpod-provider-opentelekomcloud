@@ -95,11 +95,14 @@ func FromEnv(init bool) (*Options, error) {
 	}
 
 	retOptions.ProxyHost = os.Getenv(PROXY_HOST)
-	proxyPort, err := strconv.Atoi(os.Getenv(SOCKS_PORT))
-	if err != nil {
-		return nil, err
+	socksPort := os.Getenv(SOCKS_PORT)
+	if strings.TrimSpace(socksPort) != "" {
+		proxyPort, err := strconv.Atoi(os.Getenv(SOCKS_PORT))
+		if err != nil {
+			return nil, err
+		}
+		retOptions.SocksPort = &proxyPort
 	}
-	retOptions.SocksPort = &proxyPort
 
 	retOptions.SecurityGroupId = os.Getenv(OTC_SECURITYGROUP_ID)
 
