@@ -2,14 +2,26 @@ package opentelekomcloud
 
 import (
 	"encoding/base64"
+	"fmt"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/extensions/keypairs"
+	"os"
+	"regexp"
 )
 
 func (o *OpenTelekomCloudProvider) createKeyPair(publicKey []byte) (*keypairs.KeyPair, error) {
-	keyPair, err := keypairs.Get(o.ecsv2ServiceClient, devpodKeyPairName).Extract()
+	hostname, err := os.Hostname()
+	if err != nil {
+		return nil, err
+	}
+
+	var nonAlphanumericRegex = regexp.MustCompile(`[^a-zA-Z0-9 ]+`)
+	hostname = nonAlphanumericRegex.ReplaceAllString(hostname, "")
+
+	keyPairName := fmt.Sprintf("%s-%s", devpodKeyPairName, hostname)
+	keyPair, err := keypairs.Get(o.ecsv2ServiceClient, keyPairName).Extract()
 	if err != nil {
 		createOpts := keypairs.CreateOpts{
-			Name:      devpodKeyPairName,
+			Name:      keyPairName,
 			PublicKey: string(publicKey),
 		}
 
