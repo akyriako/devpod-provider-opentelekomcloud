@@ -3,7 +3,6 @@ package cmd
 import (
 	"context"
 	"github.com/akyriako/devpod-provider-opentelekomcloud/pkg/opentelekomcloud"
-	"github.com/loft-sh/devpod/pkg/provider"
 	"github.com/loft-sh/log"
 	"github.com/spf13/cobra"
 )
@@ -25,7 +24,6 @@ func NewInitCmd() *cobra.Command {
 			return cmd.Run(
 				context.Background(),
 				opentelekomcloudProvider,
-				provider.FromEnvironment(),
 				log.Default,
 			)
 		},
@@ -38,7 +36,6 @@ func NewInitCmd() *cobra.Command {
 func (cmd *InitCmd) Run(
 	ctx context.Context,
 	opentelekomcloudProvider *opentelekomcloud.OpenTelekomCloudProvider,
-	machine *provider.Machine,
 	logs log.Logger,
 ) error {
 	return opentelekomcloudProvider.Init()
