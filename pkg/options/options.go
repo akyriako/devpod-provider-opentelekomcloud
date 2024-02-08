@@ -132,18 +132,20 @@ func FromEnv(init bool) (*Options, error) {
 	}
 
 	retOptions.MachineID = os.Getenv(MACHINE_ID)
-	if retOptions.MachineID == "" {
+	if strings.TrimSpace(retOptions.MachineID) == "" {
 		// create a MACHINE_ID
 		postfix, err := password.Generate(4, 2, 0, true, true)
 		if err != nil {
 			return nil, err
 		}
+
 		machineId := fmt.Sprintf("ecs-devpod-%s", postfix)
 		retOptions.MachineID = machineId
-		err = os.Setenv(MACHINE_ID, machineId)
-		if err != nil {
-			return nil, err
-		}
+
+		//err = os.Setenv(MACHINE_ID, machineId)
+		//if err != nil {
+		//	return nil, err
+		//}
 	}
 
 	retOptions.MachineFolder, err = fromEnvOrError(MACHINE_FOLDER)

@@ -126,16 +126,16 @@ agent:
   inactivityTimeout: ${INACTIVITY_TIMEOUT}
   injectGitCredentials: ${INJECT_GIT_CREDENTIALS}
   injectDockerCredentials: ${INJECT_DOCKER_CREDENTIALS}
-  binaries:
-    OTC_PROVIDER:
-      - os: linux
-        arch: amd64
-        path: https://github.com/akyriako/devpod-provider-opentelekomcloud/releases/download/##VERSION##/devpod-provider-opentelekomcloud-linux-amd64
-        checksum: ##CHECKSUM_LINUX_AMD64##
-      - os: linux
-        arch: arm64
-        path: https://github.com/akyriako/devpod-provider-opentelekomcloud/releases/download/##VERSION##/devpod-provider-opentelekomcloud-linux-arm64
-        checksum: ##CHECKSUM_LINUX_ARM64##
+#  binaries:
+#    OTC_PROVIDER:
+#      - os: linux
+#        arch: amd64
+#        path: https://github.com/akyriako/devpod-provider-opentelekomcloud/releases/download/##VERSION##/devpod-provider-opentelekomcloud-linux-amd64
+#        checksum: ##CHECKSUM_LINUX_AMD64##
+#      - os: linux
+#        arch: arm64
+#        path: https://github.com/akyriako/devpod-provider-opentelekomcloud/releases/download/##VERSION##/devpod-provider-opentelekomcloud-linux-arm64
+#        checksum: ##CHECKSUM_LINUX_ARM64##
   exec:
     shutdown: |-
       ${OTC_PROVIDER} stop
