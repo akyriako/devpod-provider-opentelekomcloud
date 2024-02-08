@@ -221,7 +221,6 @@ func (o *OpenTelekomCloudProvider) createServer() (*servers.Server, error) {
 		o.Config.SecurityGroupId = securityGroupId
 	}
 
-	// TODO: create a security group if it the env variable is empty
 	// add an *existing* security group (allow 22, and preferably ICMP as well)
 	err = o.addServerInSecurityGroup(server.ID, o.Config.SecurityGroupId)
 	if err != nil {
