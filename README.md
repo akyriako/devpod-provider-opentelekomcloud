@@ -2,7 +2,8 @@
 
 The Open Telekom Cloud provider for [Loft Labs' DevPod](https://github.com/loft-sh/devpod).
 
-_That is a community project, not an officially supported one by T-Systems International GmbH._
+> [!NOTE]
+> This is a community project, **not** supported officially by T-Systems International GmbH
 
 ## Overview
 
@@ -52,8 +53,10 @@ You will need to provision to your tenant the following resources before being a
 | PROXY_HOST           | false    | SOCKS Host                                        |                              |
 | SOCKS_PORT           | false    | SOCKS v5 Port                                     | 1080                         |
 
-**NAT Gateway or EIP?**: If you intend to use a NAT Gateway you should have already created an EIP and insert its ID in `OTC_FLOATINGIP_ID`
-          If not, the provider will take care creating and destroying the necessary EIP needed to access your VM.
+
+> [!NOTE]
+> **NAT Gateway or EIP?**: If you intend to use a NAT Gateway, you should have already created an EIP and insert its ID 
+> in `OTC_FLOATINGIP_ID`. If not, the provider will take care of creating and destroying the necessary EIP needed to access your VM.
 
 ## Development
 
