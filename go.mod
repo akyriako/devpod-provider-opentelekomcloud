@@ -4,8 +4,8 @@ go 1.21
 
 require (
 	github.com/loft-sh/devpod v0.5.4
-	github.com/loft-sh/log v0.0.0-20230824104949-bd516c25712a
-	github.com/opentelekomcloud/gophertelekomcloud v0.8.0
+	github.com/loft-sh/log v0.0.0-20240219160058-26d83ffb46ac
+	github.com/opentelekomcloud/gophertelekomcloud v0.9.2
 	github.com/pkg/errors v0.9.1
 	github.com/sethvargo/go-password v0.2.0
 	github.com/spf13/cobra v1.8.0

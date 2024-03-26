@@ -75,7 +75,7 @@ github.com/loft-sh/devpod/pkg/telemetry/types
 github.com/loft-sh/devpod/pkg/types
 github.com/loft-sh/devpod/pkg/util/hash
 github.com/loft-sh/devpod/pkg/version
-# github.com/loft-sh/log v0.0.0-20230824104949-bd516c25712a
+# github.com/loft-sh/log v0.0.0-20240219160058-26d83ffb46ac
 ## explicit; go 1.20
 github.com/loft-sh/log
 github.com/loft-sh/log/hash
@@ -108,7 +108,7 @@ github.com/moby/patternmatcher
 ## explicit; go 1.18
 github.com/moby/term
 github.com/moby/term/windows
-# github.com/opentelekomcloud/gophertelekomcloud v0.8.0 => github.com/opentelekomcloud/gophertelekomcloud v0.8.1-0.20240126162612-0fb6b10e8415
+# github.com/opentelekomcloud/gophertelekomcloud v0.9.2 => github.com/opentelekomcloud/gophertelekomcloud v0.8.1-0.20240126162612-0fb6b10e8415
 ## explicit; go 1.20
 github.com/opentelekomcloud/gophertelekomcloud
 github.com/opentelekomcloud/gophertelekomcloud/internal/build

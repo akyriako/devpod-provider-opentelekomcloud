@@ -3,7 +3,6 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"github.com/akyriako/devpod-provider-opentelekomcloud/pkg/opentelekomcloud"
 	"os"
 
 	devpodssh "github.com/loft-sh/devpod/pkg/ssh"
@@ -12,6 +11,8 @@ import (
 	"github.com/spf13/cobra"
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/net/proxy"
+
+	"github.com/akyriako/devpod-provider-opentelekomcloud/pkg/opentelekomcloud"
 )
 
 // CommandCmd holds the cmd flags
