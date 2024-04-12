@@ -3,7 +3,7 @@ module github.com/akyriako/devpod-provider-opentelekomcloud
 go 1.21
 
 require (
-	github.com/loft-sh/devpod v0.5.4
+	github.com/loft-sh/devpod v0.5.5
 	github.com/loft-sh/log v0.0.0-20240219160058-26d83ffb46ac
 	github.com/opentelekomcloud/gophertelekomcloud v0.9.2
 	github.com/pkg/errors v0.9.1
@@ -42,7 +42,7 @@ require (
 	github.com/moby/term v0.5.0 // indirect
 	github.com/sirupsen/logrus v1.9.3 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
-	github.com/stretchr/testify v1.8.2 // indirect
+	github.com/stretchr/testify v1.8.4 // indirect
 	github.com/tidwall/jsonc v0.3.2 // indirect
 	golang.org/x/sys v0.19.0 // indirect
 	golang.org/x/term v0.19.0 // indirect
