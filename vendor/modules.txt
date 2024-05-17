@@ -138,8 +138,8 @@ github.com/opentelekomcloud/gophertelekomcloud/pagination
 # github.com/pkg/errors v0.9.1
 ## explicit
 github.com/pkg/errors
-# github.com/sethvargo/go-password v0.2.0
-## explicit; go 1.14
+# github.com/sethvargo/go-password v0.3.0
+## explicit; go 1.22
 github.com/sethvargo/go-password/password
 # github.com/sirupsen/logrus v1.9.3
 ## explicit; go 1.13
