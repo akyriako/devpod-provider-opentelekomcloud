@@ -2,7 +2,7 @@ module github.com/akyriako/devpod-provider-opentelekomcloud
 
 go 1.21
 require (
-	github.com/loft-sh/devpod v0.5.8
+	github.com/loft-sh/devpod v0.5.11
 	github.com/loft-sh/log v0.0.0-20240219160058-26d83ffb46ac
 	github.com/opentelekomcloud/gophertelekomcloud v0.9.2
 	github.com/pkg/errors v0.9.1
