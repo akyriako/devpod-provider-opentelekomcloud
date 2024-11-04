@@ -18,4 +18,8 @@ const (
 	IDEWebStorm        IDE = "webstorm"
 	IDEFleet           IDE = "fleet"
 	IDEJupyterNotebook IDE = "jupyternotebook"
+	IDEJupyterDesktop  IDE = "jupyterdesktop"
+	IDECursor          IDE = "cursor"
+	IDEPositron        IDE = "positron"
+	IDEMarimo          IDE = "marimo"
 )
